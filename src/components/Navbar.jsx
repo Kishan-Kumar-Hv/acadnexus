@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, LogOut, Zap } from 'lucide-react';
+import { Menu, X, LogOut, Zap, User } from 'lucide-react';
+import { useGoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
 
 const Navbar = ({ currentRoute, setRoute, user, setUser }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -19,12 +22,45 @@ const Navbar = ({ currentRoute, setRoute, user, setUser }) => {
 
   const handleInstantLogin = () => {
     setUser({
-      name: "Developer Name",
-      given_name: "Developer",
-      email: "dev@acadnexus.ai",
-      picture: "https://ui-avatars.com/api/?name=Dev+User&background=6366f1&color=fff&rounded=true"
+      email: 'demo@acadnexus.com',
+      name: 'Demo User',
+      given_name: 'Demo',
+      picture: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
+      sub: 'demo-123'
     });
   };
+
+  // const handleGoogleLogin = useGoogleLogin({
+  //   onSuccess: async (tokenResponse) => {
+  //     setIsLoading(true);
+  //     try {
+  //       // Fetch user details from Google
+  //       const userInfo = await axios.get(
+  //         'https://www.googleapis.com/oauth2/v3/userinfo',
+  //         { headers: { Authorization: `Bearer ${tokenResponse.access_token}` } }
+  //       );
+  //       
+  //       // Ensure data is stored/retrieved from our backend DB
+  //       const res = await axios.post('http://localhost:5000/api/auth/google', {
+  //         credential: tokenResponse.access_token,
+  //         // Sending basic info directly for simplification, but in production, we should pass ID token
+  //         // Since useGoogleLogin (implicit flow) returns access_token, we fetched user info above
+  //         email: userInfo.data.email,
+  //         name: userInfo.data.name,
+  //         given_name: userInfo.data.given_name,
+  //         picture: userInfo.data.picture,
+  //         sub: userInfo.data.sub
+  //       });
+  //       
+  //       setUser(res.data.user);
+  //     } catch (error) {
+  //       console.error('Login failed', error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   },
+  //   onError: errorResponse => console.log(errorResponse),
+  // });
 
   const handleLogout = () => {
     setUser(null);
@@ -87,9 +123,10 @@ const Navbar = ({ currentRoute, setRoute, user, setUser }) => {
               ) : (
                 <button 
                   onClick={handleInstantLogin}
+                  disabled={isLoading}
                   className="px-6 py-2.5 bg-slate-900 hover:bg-brand-600 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all flex items-center gap-2"
                 >
-                  <Zap size={18} /> Instant Login
+                  <Zap size={18} /> {isLoading ? 'Signing In...' : 'Instant Demo Login'}
                 </button>
               )}
             </div>
@@ -140,9 +177,10 @@ const Navbar = ({ currentRoute, setRoute, user, setUser }) => {
                 <div className="flex justify-center">
                   <button 
                     onClick={() => { handleInstantLogin(); setIsOpen(false); }}
+                    disabled={isLoading}
                     className="w-full px-6 py-3 bg-slate-900 hover:bg-brand-600 text-white font-bold rounded-lg shadow-md transition-all flex items-center justify-center gap-2"
                   >
-                    <Zap size={18} /> Instant Login
+                    <Zap size={18} /> {isLoading ? 'Signing In...' : 'Instant Demo Login'}
                   </button>
                 </div>
               )}

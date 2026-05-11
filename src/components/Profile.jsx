@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, Phone, Save, ShieldCheck, Mail, ChevronDown } from 'lucide-react';
+import axios from 'axios';
 
 // Comprehensive list of country codes with flags
 const countryCodes = [
@@ -45,29 +46,29 @@ const countryCodes = [
   { code: '+254', flag: '🇰🇪', name: 'KE' }
 ];
 
-const Profile = ({ user }) => {
+const Profile = ({ user, setUser }) => {
   const [selectedCode, setSelectedCode] = useState('+91');
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 lg:py-20 animate-fade-in-up">
       <div className="mb-10">
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Your Profile</h1>
-        <p className="text-slate-500 mt-2">Manage your personal settings and contact information.</p>
+        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Your Profile</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-2">Manage your personal settings and contact information.</p>
       </div>
 
-      <div className="bg-white border text-left border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 border text-left border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden transition-colors">
         
         {/* Profile Header Box */}
-        <div className="bg-slate-50/50 border-b border-slate-100 p-8 flex items-center gap-6">
+        <div className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700/50 p-8 flex items-center gap-6">
            <img 
               src={user?.picture || "https://ui-avatars.com/api/?name=User"} 
-              alt={user.name} 
-              className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover"
+              alt={user?.name} 
+              className="w-24 h-24 rounded-full border-4 border-white dark:border-slate-700 shadow-md object-cover"
               referrerPolicy="no-referrer"
            />
            <div>
-             <h2 className="text-2xl font-bold text-slate-900">{user.name}</h2>
-             <div className="flex items-center gap-2 text-slate-500 text-sm mt-1">
+             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{user?.name}</h2>
+             <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm mt-1">
                 <ShieldCheck size={16} className="text-emerald-500" /> Google Verified Account
              </div>
            </div>
@@ -78,45 +79,45 @@ const Profile = ({ user }) => {
           
           {/* Name Info */}
           <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
-               <User size={16} className="text-slate-400" /> Full Name
+            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+               <User size={16} className="text-slate-400 dark:text-slate-500" /> Full Name
             </label>
             <input 
               type="text" 
-              defaultValue={user.name}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-medium"
+              defaultValue={user?.name}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-medium"
             />
           </div>
 
           {/* Email Info */}
           <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
-               <Mail size={16} className="text-slate-400" /> Email Address
+            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+               <Mail size={16} className="text-slate-400 dark:text-slate-500" /> Email Address
             </label>
             <input 
               type="email" 
-              defaultValue={user.email}
+              defaultValue={user?.email}
               disabled
-              className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-100/50 text-slate-500 cursor-not-allowed font-medium"
+              className="w-full px-4 py-3 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-100/50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 cursor-not-allowed font-medium"
             />
           </div>
 
           {/* Phone Number Input with Country Code Dropdown */}
           <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
-               <Phone size={16} className="text-slate-400" /> Phone Number
+            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+               <Phone size={16} className="text-slate-400 dark:text-slate-500" /> Phone Number
             </label>
             
             <div className="flex relative shadow-sm rounded-xl">
               {/* Country Code Selector */}
-              <div className="relative flex items-center border border-r-0 border-slate-200 bg-slate-50 rounded-l-xl overflow-hidden hover:bg-slate-100 transition-colors focus-within:ring-2 focus-within:ring-brand-500/20 focus-within:border-brand-500 z-10 w-[120px]">
+              <div className="relative flex items-center border border-r-0 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 rounded-l-xl overflow-hidden hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus-within:ring-2 focus-within:ring-brand-500/20 focus-within:border-brand-500 z-10 w-[120px]">
                 <select 
                   value={selectedCode}
                   onChange={(e) => setSelectedCode(e.target.value)}
-                  className="w-full h-full pl-3 pr-8 py-3 bg-transparent text-slate-700 font-medium appearance-none cursor-pointer focus:outline-none"
+                  className="w-full h-full pl-3 pr-8 py-3 bg-transparent text-slate-700 dark:text-slate-300 font-medium appearance-none cursor-pointer focus:outline-none"
                 >
                   {countryCodes.map((c, idx) => (
-                    <option key={idx} value={c.code}>
+                    <option key={idx} value={c.code} className="dark:bg-slate-800">
                       {c.flag} {c.code}
                     </option>
                   ))}
@@ -128,18 +129,54 @@ const Profile = ({ user }) => {
               <input 
                 type="tel" 
                 placeholder="0000 000 000"
-                className="flex-1 w-full px-4 py-3 rounded-r-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-medium"
+                className="flex-1 w-full px-4 py-3 rounded-r-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-medium"
               />
             </div>
             
-            <p className="text-xs text-slate-400 mt-2">Required for SMS study reminders and revision updates.</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">Required for SMS study reminders and revision updates.</p>
+          </div>
+
+          {/* Preferences */}
+          <div className="pt-6 border-t border-slate-100 dark:border-slate-700/50">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Platform Preferences</h3>
+            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+               <div className="flex items-center gap-3">
+                 <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+                 </div>
+                 <div>
+                    <h4 className="font-bold text-slate-800 dark:text-slate-200">Dark Mode</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Switch to a darker theme for night studying</p>
+                 </div>
+               </div>
+               <label className="relative inline-flex items-center cursor-pointer">
+                 <input 
+                   type="checkbox" 
+                   className="sr-only peer" 
+                   checked={user?.darkMode || false}
+                   onChange={async (e) => {
+                     const newDarkMode = e.target.checked;
+                     setUser({ ...user, darkMode: newDarkMode });
+                     try {
+                       await axios.post('http://localhost:5000/api/auth/preferences', {
+                         userId: user._id,
+                         darkMode: newDarkMode
+                       });
+                     } catch (error) {
+                       console.error('Failed to update preference', error);
+                     }
+                   }}
+                 />
+                 <div className="w-11 h-6 bg-slate-200 dark:bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 dark:peer-focus:ring-brand-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+               </label>
+            </div>
           </div>
 
         </div>
 
         {/* Footer Actions */}
-        <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end">
-           <button className="flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-bold text-sm hover:bg-brand-700 shadow-sm hover:shadow-md transition-all">
+        <div className="p-6 border-t border-slate-100 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 flex justify-end">
+           <button className="flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm shadow-sm hover:shadow-md transition-all">
              <Save size={18} /> Update Profile
            </button>
         </div>

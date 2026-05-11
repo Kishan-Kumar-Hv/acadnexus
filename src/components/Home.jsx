@@ -143,36 +143,62 @@ const Home = ({ setRoute }) => {
 
       {/* Value Propositions Below Dashboard */}
       <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 animate-fade-in-up" style={{animationDelay: '0.6s'}}>
+        <div className="mb-12 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900 text-white text-sm font-bold mb-6 shadow-xl">
+            <Zap className="text-amber-400" size={16} /> Intelligent Systems
+          </div>
+          <h2 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 tracking-tight">Core Capabilities</h2>
+          <p className="text-lg text-slate-500 mt-4 font-medium max-w-2xl mx-auto">The underlying technology driving your academic evolution.</p>
+        </div>
+        
         <div className="grid md:grid-cols-3 gap-8">
            
-           <div className="group bg-white border border-slate-200 rounded-2xl p-8 hover:shadow-[0_25px_50px_-12px_rgba(79,70,229,0.25)] hover:-translate-y-4 hover:scale-[1.03] hover:border-brand-300 transition-all duration-500 cursor-default shadow-sm">
-             <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-brand-50 transition-all duration-300">
-               <Calendar size={24} className="text-slate-700 group-hover:text-brand-600 transition-colors" />
+           {/* Card 1: Adaptive Scheduling */}
+           <div className="relative group rounded-[32px] p-[2px] overflow-hidden shadow-sm hover:shadow-[0_20px_60px_rgb(59,130,246,0.2)] transition-all duration-500 hover:-translate-y-2">
+             <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+             <div className="absolute inset-0 bg-slate-200 group-hover:opacity-0 transition-opacity duration-500"></div>
+             <div className="relative h-full bg-white rounded-[30px] p-8 md:p-10 transition-transform duration-500 flex flex-col group-hover:bg-white/95 backdrop-blur-xl">
+               <div className="absolute top-0 right-0 w-48 h-48 bg-blue-400/5 rounded-full blur-3xl group-hover:bg-blue-400/10 transition-all duration-500"></div>
+               <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl flex items-center justify-center mb-8 border border-blue-100 shadow-[0_8px_16px_rgb(59,130,246,0.1)] group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-500">
+                 <Calendar size={32} className="text-blue-600" />
+               </div>
+               <h3 className="text-2xl font-black text-slate-900 mb-4 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-indigo-600 transition-all">Adaptive Scheduling</h3>
+               <p className="text-slate-500 leading-relaxed font-medium text-lg flex-1">
+                 Missed a session? The engine automatically ripples adjustments through your entire calendar, ensuring you never fall irreparably behind.
+               </p>
              </div>
-             <h3 className="text-xl font-bold text-slate-900 mb-3">Adaptive Scheduling</h3>
-             <p className="text-slate-600 leading-relaxed">
-               Missed a session? The engine automatically ripples adjustments through your entire calendar, ensuring you never fall irreparably behind.
-             </p>
            </div>
 
-           <div className="group bg-white border border-slate-200 rounded-2xl p-8 hover:shadow-[0_25px_50px_-12px_rgba(79,70,229,0.25)] hover:-translate-y-4 hover:scale-[1.03] hover:border-brand-300 transition-all duration-500 cursor-default shadow-sm">
-             <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-brand-50 transition-all duration-300">
-               <BrainCircuit size={24} className="text-slate-700 group-hover:text-brand-600 transition-colors" />
+           {/* Card 2: Aptitude Mapping */}
+           <div className="relative group rounded-[32px] p-[2px] overflow-hidden shadow-sm hover:shadow-[0_20px_60px_rgb(168,85,247,0.2)] transition-all duration-500 hover:-translate-y-2">
+             <div className="absolute inset-0 bg-gradient-to-br from-purple-400 via-fuchsia-500 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+             <div className="absolute inset-0 bg-slate-200 group-hover:opacity-0 transition-opacity duration-500"></div>
+             <div className="relative h-full bg-white rounded-[30px] p-8 md:p-10 transition-transform duration-500 flex flex-col group-hover:bg-white/95 backdrop-blur-xl">
+               <div className="absolute top-0 right-0 w-48 h-48 bg-purple-400/5 rounded-full blur-3xl group-hover:bg-purple-400/10 transition-all duration-500"></div>
+               <div className="w-16 h-16 bg-gradient-to-br from-purple-50 to-fuchsia-50 rounded-2xl flex items-center justify-center mb-8 border border-purple-100 shadow-[0_8px_16px_rgb(168,85,247,0.1)] group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-500">
+                 <BrainCircuit size={32} className="text-purple-600" />
+               </div>
+               <h3 className="text-2xl font-black text-slate-900 mb-4 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-pink-600 transition-all">Aptitude Mapping</h3>
+               <p className="text-slate-500 leading-relaxed font-medium text-lg flex-1">
+                 Continuous logical reasoning checks generate a highly accurate profile of your true capabilities, eliminating the guesswork from education.
+               </p>
              </div>
-             <h3 className="text-xl font-bold text-slate-900 mb-3">Aptitude Mapping</h3>
-             <p className="text-slate-600 leading-relaxed">
-               Continuous logical reasoning checks generate a highly accurate profile of your true capabilities, eliminating the guesswork from education.
-             </p>
            </div>
 
-           <div className="group bg-white border border-slate-200 rounded-2xl p-8 hover:shadow-xl hover:-translate-y-2 hover:border-brand-200 transition-all duration-300 cursor-default">
-             <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-brand-50 transition-all duration-300">
-               <Compass size={24} className="text-slate-700 group-hover:text-brand-600 transition-colors" />
+           {/* Card 3: Career Calibration */}
+           <div className="relative group rounded-[32px] p-[2px] overflow-hidden shadow-sm hover:shadow-[0_20px_60px_rgb(249,115,22,0.2)] transition-all duration-500 hover:-translate-y-2">
+             <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-amber-500 to-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+             <div className="absolute inset-0 bg-slate-200 group-hover:opacity-0 transition-opacity duration-500"></div>
+             <div className="relative h-full bg-white rounded-[30px] p-8 md:p-10 transition-transform duration-500 flex flex-col group-hover:bg-white/95 backdrop-blur-xl">
+               <div className="absolute top-0 right-0 w-48 h-48 bg-orange-400/5 rounded-full blur-3xl group-hover:bg-orange-400/10 transition-all duration-500"></div>
+               <div className="w-16 h-16 bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl flex items-center justify-center mb-8 border border-orange-100 shadow-[0_8px_16px_rgb(249,115,22,0.1)] group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-500">
+                 <Compass size={32} className="text-orange-600" />
+               </div>
+               <h3 className="text-2xl font-black text-slate-900 mb-4 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-orange-600 group-hover:to-amber-600 transition-all">Career Calibration</h3>
+               <p className="text-slate-500 leading-relaxed font-medium text-lg flex-1">
+                 Your aptitude data is cross-referenced with real-time market demands to output the exact career paths where you will uniquely excel.
+               </p>
              </div>
-             <h3 className="text-xl font-bold text-slate-900 mb-3">Career Calibration</h3>
-             <p className="text-slate-600 leading-relaxed">
-               Your aptitude data is cross-referenced with real-time market demands to output the exact career paths where you will uniquely excel.
-             </p>
            </div>
 
         </div>

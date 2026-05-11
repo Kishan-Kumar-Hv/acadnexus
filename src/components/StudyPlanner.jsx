@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, Plus, Trash2, BookOpen, Clock, BrainCircuit, Sparkles, CheckCircle, Play, FileText, ChevronRight, Check } from 'lucide-react';
+import { Upload, Plus, Trash2, BookOpen, Clock, BrainCircuit, Sparkles, CheckCircle, Play, FileText, ChevronRight, Check, Trophy } from 'lucide-react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI("AIzaSyAZz8rGBNwO0ZlXVHfvuoPIPOnt0GTC0HA");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const genAI = new GoogleGenerativeAI("AIzaSyD5aHDyevRFdNbj2Gf1x_-7Qd4-fYWCYZM");
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const PremiumCard = ({ children, className = "" }) => (
-  <div className={`relative bg-white/20 backdrop-blur-[40px] rounded-[32px] border border-white/40 shadow-[0_8px_40px_rgb(0,0,0,0.08)] overflow-hidden transition-all duration-500 hover:shadow-[0_20px_60px_rgb(0,0,0,0.15)] ${className}`}>
-    <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-transparent pointer-events-none"></div>
+  <div className={`relative bg-white/80 backdrop-blur-xl rounded-[32px] border border-white/80 shadow-[0_8px_40px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-500 hover:shadow-[0_20px_60px_rgb(0,0,0,0.12)] hover:-translate-y-1 ${className}`}>
+    <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none"></div>
     <div className="relative z-10">{children}</div>
   </div>
 );
@@ -65,7 +65,7 @@ const StudyPlanner = () => {
       reader.onloadend = async () => {
         try {
           const base64Data = reader.result.split(',')[1];
-          const prompt = "Extract the main subjects, topics, or chapters from this syllabus image. Provide a concise, comma-separated list of the key areas of study. Do not use any markdown formatting, just text.";
+          const prompt = "Extract the main subjects, topics, or chapters from this uploaded syllabus document. Provide ONLY a concise, comma-separated list of the key areas of study. Do not use any conversational text, introductions, or markdown formatting. Just the raw comma-separated list.";
           
           const result = await model.generateContent([
             prompt,
@@ -111,7 +111,14 @@ const StudyPlanner = () => {
       let text = result.response.text();
       text = text.replace(/```json/g, '').replace(/```/g, '').trim();
       
-      const parsedPlan = JSON.parse(text);
+      let parsedPlan = JSON.parse(text);
+      if (!Array.isArray(parsedPlan)) {
+        if (parsedPlan && typeof parsedPlan === 'object' && Array.isArray(Object.values(parsedPlan)[0])) {
+          parsedPlan = Object.values(parsedPlan)[0];
+        } else {
+          throw new Error("Invalid JSON format from AI");
+        }
+      }
       setGeneratedPlan(parsedPlan.map((item, idx) => ({ ...item, id: idx, status: 'pending' })));
       setStep('plan');
     } catch (e) {
@@ -148,7 +155,14 @@ const StudyPlanner = () => {
       const result = await model.generateContent(prompt);
       let text = result.response.text();
       text = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      const parsedQuiz = JSON.parse(text);
+      let parsedQuiz = JSON.parse(text);
+      if (!Array.isArray(parsedQuiz)) {
+        if (parsedQuiz && typeof parsedQuiz === 'object' && Array.isArray(Object.values(parsedQuiz)[0])) {
+          parsedQuiz = Object.values(parsedQuiz)[0];
+        } else {
+          throw new Error("Invalid JSON format from AI");
+        }
+      }
       setQuizzes(parsedQuiz);
       setCurrentQuestion(0);
       setQuizScore(0);
@@ -170,8 +184,10 @@ const StudyPlanner = () => {
   const submitQuestion = () => {
     if (selectedAnswer === null) return;
     
+    let newScore = quizScore;
     if (selectedAnswer === quizzes[currentQuestion].answerIndex) {
-      setQuizScore(prev => prev + 1);
+      newScore = quizScore + 1;
+      setQuizScore(newScore);
     }
     
     if (currentQuestion < quizzes.length - 1) {
@@ -179,39 +195,34 @@ const StudyPlanner = () => {
       setSelectedAnswer(null);
     } else {
       // Quiz finished
-      alert(`Quiz completed! You scored ${selectedAnswer === quizzes[currentQuestion].answerIndex ? quizScore + 1 : quizScore} / ${quizzes.length}`);
-      setStep('plan');
+      setStep('badge');
     }
   };
 
   return (
     <div className="relative min-h-[calc(100vh-5rem)] max-w-5xl mx-auto space-y-10 animate-fade-in-up pb-12 pt-4 z-10">
-      {/* Full-screen Aesthetic Background Image */}
-      <div 
-        className="fixed inset-0 z-[-2] pointer-events-none"
-        style={{
-          backgroundImage: "url('https://i.pinimg.com/736x/97/1e/57/971e57b809e8d3e68b59f81441329c9e.jpg')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          opacity: 0.35
-        }}
-      ></div>
-      
-      <div className="absolute inset-0 z-[-1] overflow-hidden rounded-[40px] pointer-events-none">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-300/30 rounded-full mix-blend-multiply filter blur-[120px] animate-blob"></div>
-        <div className="absolute bottom-40 left-0 w-[400px] h-[400px] bg-emerald-300/30 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-2000"></div>
+      {/* 3D Ambient Orbs */}
+      <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+        <div className="absolute -top-10 -left-10 w-[500px] h-[500px] bg-brand-400/30 rounded-full mix-blend-multiply filter blur-[100px] animate-blob"></div>
+        <div className="absolute top-40 right-10 w-[400px] h-[400px] bg-amber-300/30 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-20 left-1/3 w-[600px] h-[600px] bg-purple-400/20 rounded-full mix-blend-multiply filter blur-[120px] animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="mb-10 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900 text-white text-sm font-bold mb-6 shadow-xl animate-float">
-          <Sparkles className="text-brand-400" size={16} /> AI Adaptive Planner
-        </div>
-        <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 tracking-tight">
-          Intelligent Learning Engine
-        </h1>
-        <p className="mt-4 text-lg text-slate-500 font-medium max-w-2xl mx-auto">
-          Upload your syllabus, let our AI extract the curriculum, and follow a dynamically scheduled roadmap constructed perfectly to match your goals.
-        </p>
+      <div className="relative rounded-[32px] overflow-hidden shadow-[0_8px_40px_rgb(0,0,0,0.08)] mb-10 group">
+         <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=2000" alt="Study Planner" className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-1000" />
+         <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-white/40 md:to-transparent"></div>
+         
+         <div className="relative z-10 p-10 lg:p-14 max-w-3xl">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 backdrop-blur-md text-brand-600 text-sm font-bold mb-6 shadow-sm border border-brand-100">
+              <Sparkles size={16} /> AI Adaptive Planner
+            </div>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.1] mb-6">
+              Intelligent <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-purple-600">Learning Engine</span>
+            </h1>
+            <p className="text-lg text-slate-600 font-medium leading-relaxed backdrop-blur-sm bg-white/40 p-3 rounded-xl max-w-xl">
+              Upload your syllabus, let our AI extract the curriculum, and follow a dynamically scheduled roadmap constructed perfectly to match your goals.
+            </p>
+         </div>
       </div>
 
       {step === 'setup' && (
@@ -229,7 +240,7 @@ const StudyPlanner = () => {
 
               <div className="space-y-5">
                 {subjects.map((subj) => (
-                  <div key={subj.id} className="group flex flex-col md:flex-row items-center gap-4 p-4 rounded-2xl bg-white/30 backdrop-blur-md border border-white/50 hover:border-brand-300 hover:shadow-lg hover:bg-white/40 transition-all shadow-sm">
+                  <div key={subj.id} className="group flex flex-col md:flex-row items-center gap-4 p-4 rounded-2xl bg-white border border-slate-100 hover:border-brand-200 hover:shadow-md hover:bg-slate-50 transition-all shadow-sm">
                      <div className="flex-1 w-full">
                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1 block drop-shadow-sm">Subject Name</label>
                        <input 
@@ -237,7 +248,7 @@ const StudyPlanner = () => {
                          placeholder="e.g. Data Structures" 
                          value={subj.name}
                          onChange={(e) => updateSubject(subj.id, 'name', e.target.value)}
-                         className="w-full bg-white/50 backdrop-blur-xl px-4 py-3 rounded-xl border border-white/60 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all outline-none font-bold text-slate-800 placeholder-slate-500 shadow-inner" 
+                         className="w-full bg-white px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all outline-none font-bold text-slate-800 placeholder-slate-400 shadow-sm" 
                        />
                      </div>
                      
@@ -246,7 +257,7 @@ const StudyPlanner = () => {
                        <select 
                          value={subj.difficulty}
                          onChange={(e) => updateSubject(subj.id, 'difficulty', e.target.value)}
-                         className="w-full bg-white/50 backdrop-blur-xl px-4 py-3 rounded-xl border border-white/60 focus:ring-2 focus:ring-brand-500 outline-none font-bold text-slate-800 appearance-none cursor-pointer shadow-inner"
+                         className="w-full bg-white px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 outline-none font-bold text-slate-800 appearance-none cursor-pointer shadow-sm"
                        >
                          <option value="Easy">Easy</option>
                          <option value="Medium">Medium</option>
@@ -258,7 +269,7 @@ const StudyPlanner = () => {
                         <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1 block opacity-0 md:opacity-100 hidden md:block drop-shadow-sm">Syllabus</label>
                         <input 
                            type="file" 
-                           accept="image/*" 
+                           accept="image/*,application/pdf,text/plain" 
                            ref={el => fileInputRefs.current[subj.id] = el} 
                            onChange={(e) => handleFileUpload(e, subj.id)} 
                            className="hidden" 
@@ -266,17 +277,17 @@ const StudyPlanner = () => {
                         <button 
                           onClick={() => triggerFileInput(subj.id)}
                           disabled={subj.syllabusStatus === 'extracting'}
-                          className={`w-full md:w-auto px-4 py-3 flex items-center justify-center gap-2 rounded-xl border border-white/60 font-bold transition-all shadow-sm ${
-                            subj.syllabusStatus === 'success' ? 'bg-emerald-500/20 border-emerald-300 text-emerald-800' : 
-                            subj.syllabusStatus === 'extracting' ? 'bg-brand-500/20 border-brand-300 text-brand-800 opacity-70' :
-                            'bg-white/50 backdrop-blur-xl text-slate-700 hover:bg-white/70 hover:text-brand-700'
+                          className={`w-full md:w-auto px-4 py-3 flex items-center justify-center gap-2 rounded-xl border font-bold transition-all shadow-sm ${
+                            subj.syllabusStatus === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 
+                            subj.syllabusStatus === 'extracting' ? 'bg-brand-50 border-brand-200 text-brand-700 opacity-70' :
+                            'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-brand-600'
                           }`}
                         >
                           {subj.syllabusStatus === 'success' ? <Check size={18} /> : 
                            subj.syllabusStatus === 'extracting' ? <BrainCircuit size={18} className="animate-spin" /> : 
                            <Upload size={18} />}
                           {subj.syllabusStatus === 'success' ? 'Extracted' : 
-                           subj.syllabusStatus === 'extracting' ? 'Processing...' : 'Upload Img'}
+                           subj.syllabusStatus === 'extracting' ? 'Processing...' : 'Upload File'}
                         </button>
                         
                         {/* Topic Tooltip hint if extracted */}
@@ -298,7 +309,7 @@ const StudyPlanner = () => {
                   </div>
                 ))}
 
-                <button onClick={addSubject} className="w-full py-4 rounded-2xl border-2 border-dashed border-white/50 bg-white/20 backdrop-blur-sm text-slate-700 font-bold hover:border-brand-400 hover:text-brand-700 hover:bg-white/40 transition-all flex items-center justify-center gap-2 shadow-sm">
+                <button onClick={addSubject} className="w-full py-4 rounded-2xl border-2 border-dashed border-slate-300 bg-white/50 backdrop-blur-sm text-slate-600 font-bold hover:border-brand-400 hover:text-brand-700 hover:bg-brand-50 transition-all flex items-center justify-center gap-2 shadow-sm">
                   <Plus size={20} /> Add Another Subject
                 </button>
              </div>
@@ -312,13 +323,13 @@ const StudyPlanner = () => {
                  <h2 className="text-2xl font-black text-slate-800 mb-2">Available Time</h2>
                  <p className="text-slate-500 font-medium mb-6">How many hours can you dedicate today?</p>
                  
-                 <div className="flex items-center gap-6 bg-white/30 backdrop-blur-lg p-6 rounded-2xl border border-white/50 shadow-inner">
-                    <button onClick={() => setHours(Math.max(1, hours - 1))} className="w-12 h-12 rounded-xl bg-white/60 backdrop-blur-md shadow-sm border border-white/60 text-2xl font-black text-slate-700 hover:bg-white/80 hover:text-brand-700 transition-all">-</button>
+                 <div className="flex items-center gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-inner">
+                    <button onClick={() => setHours(Math.max(1, hours - 1))} className="w-12 h-12 rounded-xl bg-white shadow-sm border border-slate-200 text-2xl font-black text-slate-700 hover:bg-slate-100 hover:text-brand-700 transition-all">-</button>
                     <div className="flex-1 text-center">
-                       <span className="text-5xl font-black text-slate-900 drop-shadow-sm">{hours}</span>
-                       <span className="text-lg font-bold text-slate-600 ml-2 drop-shadow-sm">hrs</span>
+                       <span className="text-5xl font-black text-slate-900">{hours}</span>
+                       <span className="text-lg font-bold text-slate-600 ml-2">hrs</span>
                     </div>
-                    <button onClick={() => setHours(Math.min(12, hours + 1))} className="w-12 h-12 rounded-xl bg-white/60 backdrop-blur-md shadow-sm border border-white/60 text-2xl font-black text-slate-700 hover:bg-white/80 hover:text-brand-700 transition-all">+</button>
+                    <button onClick={() => setHours(Math.min(12, hours + 1))} className="w-12 h-12 rounded-xl bg-white shadow-sm border border-slate-200 text-2xl font-black text-slate-700 hover:bg-slate-100 hover:text-brand-700 transition-all">+</button>
                  </div>
               </PremiumCard>
 
@@ -478,6 +489,29 @@ const StudyPlanner = () => {
                  </button>
               </div>
            </div>
+        </PremiumCard>
+      )}
+
+      {step === 'badge' && (
+        <PremiumCard className="p-16 text-center animate-fade-in-up border-2 border-amber-400">
+           <div className="relative w-48 h-48 mx-auto mb-8 animate-bounce">
+              <div className="absolute inset-0 bg-gradient-to-tr from-amber-400 via-yellow-300 to-orange-500 rounded-full blur-2xl opacity-50 animate-pulse"></div>
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-amber-300 to-orange-500 rounded-full shadow-[0_0_80px_rgba(251,191,36,0.6)] border-4 border-white/50">
+                 <Trophy size={80} className="text-white drop-shadow-lg" />
+              </div>
+           </div>
+           <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600 mb-4 tracking-tight drop-shadow-sm">
+             Module Mastered!
+           </h2>
+           <p className="text-xl text-slate-600 font-bold mb-8">
+             You earned the <span className="text-amber-500">"{activeSession?.subject} Scholar"</span> Badge.
+           </p>
+           <button 
+             onClick={() => setStep('plan')}
+             className="px-10 py-5 bg-slate-900 hover:bg-amber-500 text-white font-black text-lg rounded-2xl shadow-2xl hover:shadow-[0_20px_40px_rgba(245,158,11,0.3)] hover:-translate-y-2 transition-all duration-300 flex items-center gap-3 mx-auto"
+           >
+             Continue Plan <ChevronRight size={24} />
+           </button>
         </PremiumCard>
       )}
 
