@@ -37,10 +37,12 @@ const Navbar = ({ currentRoute, setRoute, user, setUser }) => {
 
       if (res.data && res.data.user) {
         setUser(res.data.user);
+      } else {
+        alert('Authentication failed: Invalid response from backend');
       }
     } catch (error) {
       console.error('Google login failed:', error);
-      alert('Google Sign-In failed. Please try again.');
+      alert('Google Sign-In error: ' + (error.response?.data?.error || error.message));
     } finally {
       setIsLoading(false);
     }
@@ -52,7 +54,15 @@ const Navbar = ({ currentRoute, setRoute, user, setUser }) => {
   };
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled || user ? 'bg-white shadow-sm py-3 border-b border-slate-200' : 'bg-white/90 backdrop-blur-md py-4 border-b border-slate-200'}`}>
+    <>
+      {isLoading && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex flex-col items-center justify-center text-white">
+          <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin mb-4"></div>
+          <p className="font-bold text-lg">Authenticating with Google...</p>
+          <p className="text-sm text-slate-300 mt-1">Connecting to AcadNexus Portal</p>
+        </div>
+      )}
+      <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled || user ? 'bg-white shadow-sm py-3 border-b border-slate-200' : 'bg-white/90 backdrop-blur-md py-4 border-b border-slate-200'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           
@@ -171,6 +181,7 @@ const Navbar = ({ currentRoute, setRoute, user, setUser }) => {
         </div>
       )}
     </nav>
+  </>
   );
 };
 
