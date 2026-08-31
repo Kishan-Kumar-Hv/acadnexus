@@ -5,7 +5,7 @@ import App from './App.jsx'
 import './index.css'
 
 // Google OAuth Client ID loaded from environment variable with fallback
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "52474881422-ou5645fpcctbp0lb3jh35qlvpll9dd48.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "94432868588-5bbo06kmo2iqqqf3n6vku6gj6m94u9ue.apps.googleusercontent.com";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
