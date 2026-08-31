@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Brain, BookOpen, Target, Puzzle, CheckCircle2, ChevronRight, Calculator, AlignLeft, Lightbulb, ArrowLeft, Play, RefreshCcw, Clock, AlertTriangle } from 'lucide-react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI("AIzaSyD5aHDyevRFdNbj2Gf1x_-7Qd4-fYWCYZM");
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+import { Brain, BookOpen, Target, Puzzle, CheckCircle2, ChevronRight, Calculator, AlignLeft, Lightbulb, ArrowLeft, Play, RefreshCcw, Clock, AlertTriangle, Sparkles } from 'lucide-react';
+import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
+import { generatePrepGuideData, generatePrepQuizData } from '../config/gemini';
 
 const PremiumCard = ({ children, className = "" }) => (
-  <div className={`relative bg-white/80 backdrop-blur-xl rounded-[32px] border border-white/80 shadow-[0_8px_40px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-500 hover:shadow-[0_20px_60px_rgb(0,0,0,0.12)] ${className}`}>
+  <div className={`relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl border border-white/80 dark:border-slate-700 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md ${className}`}>
     <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none"></div>
     <div className="relative z-10">{children}</div>
   </div>
@@ -18,7 +17,7 @@ const formatTime = (seconds) => {
   return `${m}:${s < 10 ? '0' : ''}${s}`;
 };
 
-const AptitudePreparation = () => {
+const AptitudePreparation = ({ user }) => {
   const [step, setStep] = useState('home'); // home, loading, learn, quiz, quiz_result
   const [activeCategory, setActiveCategory] = useState(null);
   const [learningContent, setLearningContent] = useState([]);
@@ -28,6 +27,20 @@ const AptitudePreparation = () => {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(1200); // 20 minutes
+
+  const saveQuizScore = async (finalScore) => {
+    if (!user?._id) return;
+    try {
+      await axios.post(`${API_BASE_URL}/api/assessments/score/${user._id}`, {
+        category: activeCategory?.title || 'Aptitude Practice Quiz',
+        score: finalScore,
+        total: quizQuestions.length,
+        details: { categoryId: activeCategory?.id }
+      });
+    } catch (err) {
+      console.error("Failed to save quiz score to backend:", err);
+    }
+  };
 
   const categories = [
     {
@@ -68,16 +81,17 @@ const AptitudePreparation = () => {
       color: 'text-amber-500',
       bg: 'bg-amber-50',
       border: 'border-amber-200',
-      topics: ['Pattern Completion', 'Figure Matrices', 'Mirror Images', 'Paper Folding']
+      topics: ['Pattern Matrices', 'Spatial Reasoning', 'Sequence Completion', 'Rule Deduction']
     }
   ];
 
   useEffect(() => {
     let timer;
     if (step === 'quiz' && timeLeft > 0) {
-      timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+      timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
     } else if (timeLeft === 0 && step === 'quiz') {
-      alert("Time is up! Submitting your quiz.");
       setStep('quiz_result');
     }
     return () => clearInterval(timer);
@@ -98,35 +112,16 @@ const AptitudePreparation = () => {
     setActiveCategory(category);
     setStep('loading');
 
-    const prompt = `You are an expert aptitude tutor. Generate a highly structured, comprehensive study guide for ${category.title}. 
-    Focus specifically on these topics: ${category.topics.join(', ')}.
-    Include key formulas, core concepts, and quick tricks for each.
-    Return EXACTLY a raw JSON array of objects. DO NOT wrap the response in markdown blocks like \`\`\`json. Return pure JSON.
-    Structure:
-    [
-      { "subheading": "Topic Name", "content": "Detailed explanation, formulas, and strategies..." }
-    ]`;
-
     try {
-      const result = await model.generateContent(prompt);
-      let text = result.response.text();
-      text = text.replace(/```json/gi, '').replace(/```/gi, '').trim();
-      
-      let parsed = JSON.parse(text);
-      if (!Array.isArray(parsed)) {
-        if (parsed && typeof parsed === 'object' && Array.isArray(Object.values(parsed)[0])) {
-          parsed = Object.values(parsed)[0];
-        } else {
-          throw new Error("Invalid format");
-        }
-      }
-      setLearningContent(parsed);
-      setStep('learn');
+      const guide = await generatePrepGuideData(category);
+      setLearningContent(guide);
+      setTimeout(() => setStep('learn'), 300);
     } catch (e) {
       console.error(e);
-      setLearningContent([
-        { subheading: "Could not load AI content", content: "Please try again later. The Gemini API might be rate limited." }
-      ]);
+      setLearningContent(category.topics.map(t => ({
+        subheading: t,
+        content: `Comprehensive revision notes and shortcuts for ${t}.`
+      })));
       setStep('learn');
     }
   };
@@ -135,38 +130,28 @@ const AptitudePreparation = () => {
     setActiveCategory(category);
     setStep('loading');
 
-    const prompt = `Generate exactly 20 multiple-choice questions for ${category.title} aptitude testing. 
-    They should cover topics like: ${category.topics.join(', ')}.
-    Return EXACTLY a raw JSON array of objects. DO NOT wrap the response in markdown blocks like \`\`\`json. Return pure JSON.
-    Structure:
-    [
-      { "question": "Question text here?", "options": ["Option A", "Option B", "Option C", "Option D"], "answerIndex": 0 }
-    ]`;
-
     try {
-      const result = await model.generateContent(prompt);
-      let text = result.response.text();
-      text = text.replace(/```json/gi, '').replace(/```/gi, '').trim();
-      
-      let parsed = JSON.parse(text);
-      if (!Array.isArray(parsed)) {
-        if (parsed && typeof parsed === 'object' && Array.isArray(Object.values(parsed)[0])) {
-          parsed = Object.values(parsed)[0];
-        } else {
-          throw new Error("Invalid format");
-        }
-      }
-      
-      setQuizQuestions(parsed);
+      const questions = await generatePrepQuizData(category);
+      setQuizQuestions(questions.map(q => ({
+        question: q.question,
+        options: q.options,
+        answerIndex: q.correctAnswerIndex ?? 0,
+        explanation: q.explanation
+      })));
       setCurrentQuestionIndex(0);
       setSelectedAnswer(null);
       setScore(0);
-      setTimeLeft(1200); // Reset timer to 20 mins
-      setStep('quiz');
+      setTimeLeft(1200);
+      setTimeout(() => setStep('quiz'), 300);
     } catch (e) {
       console.error(e);
       setQuizQuestions([
-        { question: "Fallback Quiz generated due to AI limit or formatting issue. What is 2+2?", options: ["3", "4", "5", "6"], answerIndex: 1 }
+        {
+          question: "If 12 men complete a project in 20 days, how many men can complete it in 15 days?",
+          options: ["14", "16", "18", "20"],
+          answerIndex: 1,
+          explanation: "Man-days = 12 * 20 = 240. Required men = 240 / 15 = 16 men."
+        }
       ]);
       setCurrentQuestionIndex(0);
       setSelectedAnswer(null);
@@ -189,6 +174,7 @@ const AptitudePreparation = () => {
       setCurrentQuestionIndex(prev => prev + 1);
       setSelectedAnswer(null);
     } else {
+      saveQuizScore(newScore);
       setStep('quiz_result');
     }
   };

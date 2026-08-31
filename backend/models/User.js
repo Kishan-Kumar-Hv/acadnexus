@@ -17,19 +17,50 @@ const userSchema = new mongoose.Schema({
   },
   given_name: String,
   picture: String,
+  // User profile extensions
+  countryCode: {
+    type: String,
+    default: '+91'
+  },
+  phoneNumber: {
+    type: String,
+    default: ''
+  },
+  academicStage: {
+    type: String,
+    default: 'Completed 12th Grade'
+  },
+  targetMajor: {
+    type: String,
+    default: ''
+  },
+  bio: String,
   // User preferences
   darkMode: {
     type: Boolean,
     default: false
   },
-  // Store generated data
+  // Store generated data & history
   quizScores: [{
     category: String,
     score: Number,
     total: Number,
+    details: mongoose.Schema.Types.Mixed,
     date: { type: Date, default: Date.now }
   }],
   savedPlans: {
+    type: Array,
+    default: []
+  },
+  savedSchedules: {
+    type: Array,
+    default: []
+  },
+  savedColleges: {
+    type: Array,
+    default: []
+  },
+  flashcardDecks: {
     type: Array,
     default: []
   },

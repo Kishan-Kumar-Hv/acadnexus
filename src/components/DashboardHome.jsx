@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, Clock, Flame, TrendingUp, Calendar as CalendarIcon, MoreVertical, PlayCircle, Zap, BookOpen, Activity, Sparkles, Check, ChevronRight, Target, Trophy, Plus } from 'lucide-react';
+import { CheckCircle, Clock, Flame, TrendingUp, Calendar as CalendarIcon, MoreVertical, PlayCircle, Zap, BookOpen, Activity, Sparkles, Check, ChevronRight, Target, Trophy, Plus, Trash2 } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 // Animated Counter Component
 const AnimatedCounter = ({ end, duration = 1500, suffix = "", prefix = "" }) => {
@@ -185,7 +186,7 @@ const DashboardHome = ({ user }) => {
   const fetchTasks = async () => {
     if (!user?._id) return;
     try {
-      const res = await axios.get(`http://localhost:5000/api/tasks/${user._id}`);
+      const res = await axios.get(`${API_BASE_URL}/api/tasks/${user._id}`);
       setTasks(res.data);
     } catch (err) {
       console.error('Failed to fetch tasks', err);
@@ -216,7 +217,7 @@ const DashboardHome = ({ user }) => {
         status: 'pending',
         iconName: 'Target'
       };
-      const res = await axios.post(`http://localhost:5000/api/tasks/${user._id}`, newTask);
+      const res = await axios.post(`${API_BASE_URL}/api/tasks/${user._id}`, newTask);
       setTasks([...tasks, res.data]);
       setNewTaskTitle('');
       setIsAdding(false);
@@ -228,18 +229,27 @@ const DashboardHome = ({ user }) => {
   const toggleTaskStatus = async (id) => {
     if (!user?._id) return;
     try {
-      // Optimistic UI update
       setTasks(tasks.map(t => {
         if (t._id === id) {
           return { ...t, status: t.status === 'pending' ? 'completed' : 'pending', progress: t.status === 'pending' ? 100 : 0 };
         }
         return t;
       }));
-      // Server update
-      await axios.put(`http://localhost:5000/api/tasks/${user._id}/${id}`);
+      await axios.put(`${API_BASE_URL}/api/tasks/${user._id}/${id}`);
     } catch (err) {
       console.error('Failed to toggle task', err);
-      fetchTasks(); // revert on failure
+      fetchTasks();
+    }
+  };
+
+  const deleteTask = async (id) => {
+    if (!user?._id) return;
+    try {
+      setTasks(tasks.filter(t => (t._id || t.id) !== id));
+      await axios.delete(`${API_BASE_URL}/api/tasks/${user._id}/${id}`);
+    } catch (err) {
+      console.error('Failed to delete task', err);
+      fetchTasks();
     }
   };
 
@@ -271,7 +281,7 @@ const DashboardHome = ({ user }) => {
       </div>
 
       {/* Hero Section */}
-      <div className="relative rounded-[32px] overflow-hidden shadow-[0_8px_40px_rgb(0,0,0,0.08)] mb-8 border border-white/60 group">
+      <div className="relative rounded-2xl overflow-hidden shadow-sm mb-6 border border-white/60 dark:border-slate-700/60 group">
          {/* Background Image */}
          <div className="absolute inset-0 z-0">
            <img 
@@ -279,80 +289,80 @@ const DashboardHome = ({ user }) => {
              alt="Study Background" 
              className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-1000"
            />
-           <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-white/40 md:to-transparent"></div>
+           <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-white/40 md:to-transparent dark:from-slate-900 dark:via-slate-900/95 dark:to-transparent"></div>
          </div>
          
-         <div className="relative z-10 p-8 lg:p-12 flex flex-col lg:flex-row justify-between items-center gap-10 h-full">
+         <div className="relative z-10 p-6 lg:p-8 flex flex-col lg:flex-row justify-between items-center gap-6 h-full">
            <div className="flex-1 max-w-2xl">
-             <div className="flex items-center gap-5 mb-8">
+             <div className="flex items-center gap-3.5 mb-4">
                 <img 
                   src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=200" 
                   alt="Profile" 
-                  className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-white shadow-lg object-cover"
+                  className="w-12 h-12 rounded-full border-2 border-white shadow-md object-cover"
                 />
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-brand-100 text-brand-700 text-sm font-bold shadow-sm">
-                  <span className="relative flex h-3 w-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-brand-100 dark:border-brand-900/40 text-brand-700 dark:text-brand-300 text-xs font-semibold shadow-sm">
+                  <span className="relative flex h-2.5 w-2.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-brand-500"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-500"></span>
                   </span>
                   Tracking {pendingTasks.length} pending missions
                 </div>
              </div>
              
-             <h1 className="text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.1]">
-               {getGreeting()},<br />{user?.name || 'Kishan'}!
+             <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-snug">
+               {getGreeting()}, {user?.name || 'Kishan'}!
              </h1>
-             <p className="text-slate-600 dark:text-slate-300 mt-5 font-medium text-lg leading-relaxed max-w-xl backdrop-blur-sm bg-white/30 dark:bg-slate-900/40 p-2 rounded-xl border border-white/50 dark:border-slate-700/50">
-               You are <strong className="text-emerald-600 dark:text-emerald-400 font-extrabold">{dailyProgress}%</strong> through your daily goals. Keep pushing, completing your tasks builds momentum towards your success.
+             <p className="text-slate-600 dark:text-slate-300 mt-3 font-medium text-sm sm:text-base leading-relaxed max-w-xl backdrop-blur-sm bg-white/30 dark:bg-slate-900/40 p-2 rounded-xl border border-white/50 dark:border-slate-700/50">
+               You are <strong className="text-emerald-600 dark:text-emerald-400 font-bold">{dailyProgress}%</strong> through your daily goals. Keep pushing, completing your tasks builds momentum towards your success.
              </p>
            </div>
 
            {/* Daily Goal Ring Hero */}
-           <div className="relative group/ring shrink-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-8 rounded-[40px] border border-white dark:border-slate-700 shadow-2xl dark:shadow-none">
-              <ActivityRing progress={dailyProgress} size={160} strokeWidth={12} colorClass="text-brand-500 dark:text-brand-400" trackClass="text-slate-200 dark:text-slate-700" />
+           <div className="relative group/ring shrink-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-5 rounded-2xl border border-white dark:border-slate-700 shadow-lg dark:shadow-none">
+              <ActivityRing progress={dailyProgress} size={120} strokeWidth={10} colorClass="text-brand-500 dark:text-brand-400" trackClass="text-slate-200 dark:text-slate-700" />
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-4xl font-black text-slate-800 dark:text-white">
+                <span className="text-2xl font-extrabold text-slate-800 dark:text-white">
                    <AnimatedCounter end={dailyProgress} suffix="%" />
                 </span>
-                <span className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">Done</span>
+                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">Done</span>
               </div>
            </div>
          </div>
       </div>
 
       {/* Bento Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         
         {/* Streak Bento Card */}
-        <div className="relative rounded-[32px] overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 h-64">
-           <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800" alt="Streak" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+        <div className="relative rounded-2xl overflow-hidden group shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 h-48">
+           <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800" alt="Streak" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
-           <div className="relative z-10 flex flex-col h-full justify-between p-8 text-white">
+           <div className="relative z-10 flex flex-col h-full justify-between p-5 text-white">
               <div className="flex justify-between items-start">
-                <h3 className="text-sm font-black uppercase tracking-widest mb-1 text-orange-400 drop-shadow-md">Current Streak</h3>
-                <Flame size={28} className="text-orange-500 animate-pulse drop-shadow-md" />
+                <h3 className="text-xs font-bold uppercase tracking-wider mb-1 text-orange-400 drop-shadow-md">Current Streak</h3>
+                <Flame size={22} className="text-orange-500 animate-pulse drop-shadow-md" />
               </div>
               <div>
-                <div className="text-5xl font-black flex items-center gap-3 drop-shadow-lg">
-                  <AnimatedCounter end={12} /> <span className="text-xl text-orange-400">Days</span>
+                <div className="text-3xl font-extrabold flex items-center gap-2 drop-shadow-lg">
+                  <AnimatedCounter end={12} /> <span className="text-base text-orange-400 font-semibold">Days</span>
                 </div>
-                 <p className="text-slate-200 font-medium mt-2 drop-shadow-md">Top <strong className="text-orange-400">5%</strong> of students.</p>
+                 <p className="text-slate-200 text-xs font-medium mt-1 drop-shadow-md">Top <strong className="text-orange-400">5%</strong> of students.</p>
               </div>
            </div>
         </div>
 
         {/* Productivity Bento Card */}
-        <div className="relative rounded-[32px] overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 h-64">
-           <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=800" alt="Productivity" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+        <div className="relative rounded-2xl overflow-hidden group shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 h-48">
+           <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=800" alt="Productivity" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
-           <div className="relative z-10 flex flex-col h-full justify-between p-8 text-white">
+           <div className="relative z-10 flex flex-col h-full justify-between p-5 text-white">
               <div className="flex justify-between items-start">
-                <h3 className="text-sm font-black uppercase tracking-widest mb-1 text-brand-400 drop-shadow-md">Productivity</h3>
-                <TrendingUp size={28} className="text-brand-400 drop-shadow-md" />
+                <h3 className="text-xs font-bold uppercase tracking-wider mb-1 text-brand-400 drop-shadow-md">Productivity</h3>
+                <TrendingUp size={22} className="text-brand-400 drop-shadow-md" />
               </div>
               <div>
-                <div className="text-5xl font-black flex items-center gap-3 mb-4 drop-shadow-lg">
-                  <AnimatedCounter end={85} /> <span className="text-xl text-brand-400">%</span>
+                <div className="text-3xl font-extrabold flex items-center gap-2 mb-3 drop-shadow-lg">
+                  <AnimatedCounter end={85} /> <span className="text-base text-brand-400 font-semibold">%</span>
                 </div>
                  <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden shadow-inner">
                     <div className="h-full bg-brand-400 rounded-full w-[85%] shadow-[0_0_10px_rgb(96,165,250)]"></div>
@@ -362,23 +372,23 @@ const DashboardHome = ({ user }) => {
         </div>
 
         {/* Mini Chart Bento */}
-        <div className="relative rounded-[32px] overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 h-64">
-           <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800" alt="Output" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+        <div className="relative rounded-2xl overflow-hidden group shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 h-48">
+           <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800" alt="Output" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/95 via-slate-900/60 to-slate-900/20"></div>
-           <div className="relative z-10 flex flex-col h-full justify-between p-8 text-white">
+           <div className="relative z-10 flex flex-col h-full justify-between p-5 text-white">
              <div>
-               <h3 className="text-sm font-black uppercase tracking-widest mb-1 text-emerald-400 drop-shadow-md">Weekly Output</h3>
-               <div className="text-3xl font-black flex items-center gap-2 drop-shadow-lg">
-                 42 <span className="text-sm font-bold text-emerald-900 bg-emerald-400 px-2 py-1 rounded-lg">+12%</span>
+               <h3 className="text-xs font-bold uppercase tracking-wider mb-1 text-emerald-400 drop-shadow-md">Weekly Output</h3>
+               <div className="text-2xl font-extrabold flex items-center gap-2 drop-shadow-lg">
+                 42 <span className="text-xs font-bold text-emerald-900 bg-emerald-400 px-1.5 py-0.5 rounded-md">+12%</span>
                </div>
              </div>
              
              {/* Minimal SVG Bar */}
-             <div className="flex items-end justify-between h-20 mt-4 gap-2">
+             <div className="flex items-end justify-between h-14 mt-2 gap-1.5">
                 {chartData.map((val, i) => (
-                  <div key={i} className="w-full bg-white/10 rounded-t-lg relative group/minibar hover:bg-white/30 transition-colors" style={{ height: '100%' }}>
+                  <div key={i} className="w-full bg-white/10 rounded-t relative group/minibar hover:bg-white/30 transition-colors" style={{ height: '100%' }}>
                     <div 
-                      className={`absolute bottom-0 w-full rounded-t-lg transition-all duration-1000 ${i === 5 ? 'bg-emerald-400 shadow-[0_0_10px_rgb(52,211,153)]' : 'bg-white/40'}`}
+                      className={`absolute bottom-0 w-full rounded-t transition-all duration-1000 ${i === 5 ? 'bg-emerald-400 shadow-[0_0_10px_rgb(52,211,153)]' : 'bg-white/40'}`}
                       style={{ height: mounted ? `${val}%` : '0%' }}
                     ></div>
                   </div>
@@ -388,12 +398,12 @@ const DashboardHome = ({ user }) => {
         </div>
       </div>
 
-      {/* Massive Task Hub */}
-      <PremiumCard className="p-0 overflow-hidden flex flex-col md:flex-row border-t-2 border-t-white/90">
+      {/* Task Hub */}
+      <PremiumCard className="p-0 overflow-hidden flex flex-col md:flex-row border-t border-t-white/90">
         
         {/* Sidebar for Task Categories */}
-        <div className="w-full md:w-80 bg-slate-50/50 dark:bg-slate-800/50 border-r border-slate-200/50 dark:border-slate-700/50 p-8 flex flex-col relative z-10">
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-8 tracking-tight">Mission Control</h2>
+        <div className="w-full md:w-72 bg-slate-50/50 dark:bg-slate-800/50 border-r border-slate-200/50 dark:border-slate-700/50 p-6 flex flex-col relative z-10">
+          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight">Mission Control</h2>
           
           <div className="space-y-4">
             <button 
@@ -545,8 +555,12 @@ const DashboardHome = ({ user }) => {
                         <PlayCircle size={24} />
                       </button>
                     )}
-                    <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-700 dark:hover:text-white transition-colors">
-                       <MoreVertical size={20} />
+                    <button 
+                      onClick={() => deleteTask(task._id || task.id)}
+                      title="Delete Mission"
+                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    >
+                       <Trash2 size={18} />
                     </button>
                   </div>
                 </div>

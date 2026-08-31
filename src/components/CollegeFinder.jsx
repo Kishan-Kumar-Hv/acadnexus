@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
-import { GraduationCap, MapPin, Users, Building, Sparkles, BrainCircuit, ArrowRight, CheckCircle2, ChevronRight, Compass, RefreshCcw, Landmark, Search } from 'lucide-react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI("AIzaSyD5aHDyevRFdNbj2Gf1x_-7Qd4-fYWCYZM");
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+import { GraduationCap, MapPin, Users, Building, Sparkles, BrainCircuit, ArrowRight, CheckCircle2, ChevronRight, Compass, RefreshCcw, Landmark, Search, Zap } from 'lucide-react';
+import { generateCollegeMatches } from '../config/gemini';
 
 const PremiumCard = ({ children, className = "" }) => (
-  <div className={`relative bg-white/80 backdrop-blur-xl rounded-[32px] border border-white/80 shadow-[0_8px_40px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-500 hover:shadow-[0_20px_60px_rgb(0,0,0,0.12)] hover:-translate-y-1 ${className}`}>
+  <div className={`relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl border border-white/80 dark:border-slate-700 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${className}`}>
     <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none"></div>
     <div className="relative z-10">{children}</div>
   </div>
@@ -15,96 +12,65 @@ const PremiumCard = ({ children, className = "" }) => (
 const CollegeFinder = () => {
   const [step, setStep] = useState('config'); // config, processing, results
   const [preferences, setPreferences] = useState({
-    academicStage: '',
-    major: '',
-    city: '',
-    locationType: '',
-    vibe: '',
-    size: ''
+    academicStage: 'Completed 12th Grade (Looking for Undergraduate Degree)',
+    major: 'Computer Science & Engineering',
+    city: 'Bangalore',
+    locationType: 'Urban / City Center',
+    vibe: 'Collaborative & Innovative',
+    size: 'Medium (5k - 15k)'
   });
   const [results, setResults] = useState([]);
   const [processingProgress, setProcessingProgress] = useState(0);
 
   const handleGenerate = async () => {
-    if (!preferences.academicStage || !preferences.major || !preferences.locationType || !preferences.vibe || !preferences.size) {
-      alert("Please fill out the core preferences (Stage, Major, Vibe, Size) so the AI can find your perfect match.");
-      return;
-    }
+    // Fill in default fallback if user cleared anything
+    const finalPrefs = {
+      academicStage: preferences.academicStage || 'Completed 12th Grade (Looking for Undergraduate Degree)',
+      major: preferences.major || 'Computer Science & Engineering',
+      city: preferences.city || 'Bangalore',
+      locationType: preferences.locationType || 'Urban / City Center',
+      vibe: preferences.vibe || 'Collaborative & Innovative',
+      size: preferences.size || 'Medium (5k - 15k)'
+    };
 
     setStep('processing');
+    setProcessingProgress(25);
     
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.floor(Math.random() * 10) + 2;
-      if (progress > 90) progress = 90;
-      setProcessingProgress(progress);
-    }, 300);
-
-    const prompt = `You are an expert Indian admissions and career counselor. The student is trying to find the right educational institution but is confused about the campus environment and culture.
-    
-    Student Profile & Preferences:
-    - Current Academic Stage: ${preferences.academicStage} (Crucial: Recommend institutions appropriate for this level)
-    - Target Field/Domain: ${preferences.major}
-    - Specific Target City/Region (if provided): ${preferences.city || 'Anywhere in India'}
-    - Preferred Location Vibe: ${preferences.locationType}
-    - Campus Culture/Vibe: ${preferences.vibe}
-    - Institution Size: ${preferences.size}
-
-    Based strictly on these preferences, recommend 4 real-world top educational institutions (High Schools, Colleges, or Universities).
-    If a specific city/region was provided, try to find the absolute best matches within or near that city. If not, recommend from diverse states across India.
-    Focus heavily on describing the "Environment & Culture" to relieve their confusion about what it feels like to be there.
-    
-    Return EXACTLY a raw JSON array of objects. DO NOT wrap the response in markdown blocks like \`\`\`json. Return pure JSON.
-    Structure:
-    [
-      {
-        "name": "University Name",
-        "location": "City, State, India",
-        "matchPercentage": 95,
-        "environmentSummary": "A vivid 2-3 sentence description of what the campus feels like daily.",
-        "whyItFits": "Why this specific college matches their major and cultural vibe."
-      }
-    ]
-    `;
+    const pInterval = setInterval(() => {
+      setProcessingProgress(prev => {
+        if (prev >= 90) return 90;
+        return prev + 25;
+      });
+    }, 200);
 
     try {
-      const result = await model.generateContent(prompt);
-      let text = result.response.text();
-      text = text.replace(/```json/gi, '').replace(/```/gi, '').trim();
-      let parsedResults = JSON.parse(text);
-      if (!Array.isArray(parsedResults)) {
-        if (parsedResults && typeof parsedResults === 'object' && Array.isArray(Object.values(parsedResults)[0])) {
-          parsedResults = Object.values(parsedResults)[0];
-        } else {
-          throw new Error("Invalid JSON format");
-        }
-      }
-      
-      clearInterval(interval);
+      const matchResults = await generateCollegeMatches(finalPrefs);
+      clearInterval(pInterval);
       setProcessingProgress(100);
       
       setTimeout(() => {
-        setResults(parsedResults);
+        setResults(matchResults);
         setStep('results');
-      }, 600);
-
+      }, 400);
     } catch (e) {
-      console.error(e);
-      clearInterval(interval);
+      console.error('Matchmaker error:', e);
+      clearInterval(pInterval);
       setProcessingProgress(100);
-      
-      // Fallback
-      setResults([
-        {
-          name: "Example University (AI Formatting Error)",
-          location: "Tech Hub City",
-          matchPercentage: 90,
-          environmentSummary: "A vibrant, fast-paced campus deeply integrated into the surrounding city. Students are highly collaborative and spend time in modern labs and local cafes.",
-          whyItFits: "It perfectly aligns with your desire for an urban, tech-focused environment."
-        }
-      ]);
+      const fallbackMatches = await generateCollegeMatches(finalPrefs);
+      setResults(fallbackMatches);
       setStep('results');
     }
+  };
+
+  const handleAutoFill = (domain, cityName, stage) => {
+    setPreferences({
+      academicStage: stage || 'Completed 12th Grade (Looking for Undergraduate Degree)',
+      major: domain,
+      city: cityName,
+      locationType: 'Urban / City Center',
+      vibe: 'Collaborative & Innovative',
+      size: 'Medium (5k - 15k)'
+    });
   };
 
   return (
@@ -134,18 +100,62 @@ const CollegeFinder = () => {
       </div>
 
       {step === 'config' && (
-        <PremiumCard className="p-8 md:p-12 max-w-3xl mx-auto">
-           <div className="space-y-8">
+        <PremiumCard className="p-6 md:p-10 max-w-3xl mx-auto">
+           <div className="space-y-6">
+
+             {/* Quick Match Presets */}
+             <div>
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
+                  <Zap size={14} className="text-amber-500" /> Quick Match Presets
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleAutoFill('Computer Science & AI', 'Bangalore', 'Completed 12th Grade (Looking for Undergraduate Degree)')}
+                    className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-slate-700 text-orange-700 dark:text-orange-300 text-xs font-bold hover:bg-orange-100 dark:hover:bg-slate-600 transition-colors border border-orange-200 dark:border-slate-600 flex items-center gap-1.5"
+                  >
+                    ⚡ Tech & CS (Bangalore)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAutoFill('Medical Sciences / MBBS', 'Delhi', 'Completed 12th Grade (Looking for Undergraduate Degree)')}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 text-xs font-bold hover:bg-emerald-100 dark:hover:bg-slate-600 transition-colors border border-emerald-200 dark:border-slate-600 flex items-center gap-1.5"
+                  >
+                    🩺 Medicine & Healthcare
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAutoFill('Business Administration / MBA', 'Mumbai', 'Current Undergraduate (Looking for Master\'s/Postgrad)')}
+                    className="px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-slate-700 text-blue-700 dark:text-blue-300 text-xs font-bold hover:bg-blue-100 dark:hover:bg-slate-600 transition-colors border border-blue-200 dark:border-slate-600 flex items-center gap-1.5"
+                  >
+                    💼 MBA & Management
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAutoFill('Design, UI/UX & Fine Arts', 'Ahmedabad', 'Completed 12th Grade (Looking for Undergraduate Degree)')}
+                    className="px-3 py-1.5 rounded-lg bg-purple-50 dark:bg-slate-700 text-purple-700 dark:text-purple-300 text-xs font-bold hover:bg-purple-100 dark:hover:bg-slate-600 transition-colors border border-purple-200 dark:border-slate-600 flex items-center gap-1.5"
+                  >
+                    🎨 Design & Architecture
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAutoFill('PCM / Science Stream', 'Delhi', 'Completed 10th Grade (Looking for High School/Stream)')}
+                    className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-200 dark:border-slate-600 flex items-center gap-1.5"
+                  >
+                    🏫 11th/12th Streams
+                  </button>
+                </div>
+             </div>
              
              {/* Academic Stage */}
              <div>
-                <label className="text-sm font-black text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
-                  <GraduationCap size={18} className="text-emerald-500" /> Current Academic Stage
+                <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest mb-2 flex items-center gap-2">
+                  <GraduationCap size={16} className="text-emerald-500" /> Current Academic Stage
                 </label>
                 <select 
                   value={preferences.academicStage}
                   onChange={(e) => setPreferences({...preferences, academicStage: e.target.value})}
-                  className="w-full bg-slate-50 px-5 py-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500 transition-all outline-none font-bold text-slate-800 cursor-pointer shadow-sm"
+                  className="w-full bg-slate-50 dark:bg-slate-700 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-orange-500 transition-all outline-none font-bold text-slate-800 dark:text-white cursor-pointer shadow-sm text-sm"
                 >
                    <option value="">Select your current stage...</option>
                    <option value="Completed 10th Grade (Looking for High School/Stream)">Completed 10th Grade (Looking for 11th/12th / Stream / Diploma)</option>

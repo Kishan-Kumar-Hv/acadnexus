@@ -4,10 +4,34 @@ import Home from './components/Home';
 import Features from './components/Features';
 import About from './components/About';
 import DashboardLayout from './components/DashboardLayout';
+import axios from 'axios';
+import { API_BASE_URL } from './config/api';
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState('home');
   const [user, setUser] = useState(null);
+
+  const handleSetUser = (userData) => {
+    setUser(userData);
+    if (userData) {
+      localStorage.setItem('acadnexus_user', JSON.stringify(userData));
+      localStorage.removeItem('acadnexus_signed_out');
+    } else {
+      localStorage.removeItem('acadnexus_user');
+      localStorage.setItem('acadnexus_signed_out', 'true');
+    }
+  };
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('acadnexus_user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        localStorage.removeItem('acadnexus_user');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (user?.darkMode) {
@@ -20,13 +44,13 @@ function App() {
   return (
     <div className="dark:bg-slate-900 transition-colors duration-300">
       {user ? (
-        <DashboardLayout user={user} setUser={setUser} />
+        <DashboardLayout user={user} setUser={handleSetUser} />
       ) : (
         <div className="min-h-screen flex flex-col bg-slate-50">
-          <Navbar currentRoute={currentRoute} setRoute={setCurrentRoute} user={user} setUser={setUser} />
+          <Navbar currentRoute={currentRoute} setRoute={setCurrentRoute} user={user} setUser={handleSetUser} />
           
           <main className="flex-grow pt-20">
-            {currentRoute === 'home' && <Home setRoute={setCurrentRoute} />}
+            {currentRoute === 'home' && <Home setRoute={setCurrentRoute} setUser={handleSetUser} />}
             {currentRoute === 'features' && <Features />}
             {currentRoute === 'about' && <About />}
           </main>

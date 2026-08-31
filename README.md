@@ -41,40 +41,31 @@ git clone <repository-url>
 cd acadnexus
 ```
 
-### 2. Backend Setup
+### 2. Quick Start (Frontend + Backend)
 
-Navigate to the `backend` directory and install the dependencies:
-
-```bash
-cd backend
-npm install
-```
-
-Create a `.env` file in the `backend` directory with the following variables:
-```env
-MONGO_URI=your_mongodb_connection_string
-PORT=5000
-GOOGLE_CLIENT_ID=your_google_client_id
-```
-
-Start the backend server:
-```bash
-npm run dev
-# The server will start on http://localhost:5000
-```
-
-### 3. Frontend Setup
-
-Open a new terminal, navigate to the project root, and install the frontend dependencies:
+From the project root directory, run:
 
 ```bash
-npm install
+npm run dev:all
 ```
 
-Start the frontend development server:
+- **Frontend**: [http://localhost:5173](http://localhost:5173)
+- **Backend API**: [http://localhost:5001](http://localhost:5001)
+
+### 3. Running Separately
+
+If you prefer to run services individually:
+
+**Backend**:
+```bash
+npm run server
+# Server will start on http://localhost:5001
+```
+
+**Frontend**:
 ```bash
 npm run dev
-# The app will be available at http://localhost:5173
+# Frontend will start on http://localhost:5173
 ```
 
 ## 🔒 Authentication

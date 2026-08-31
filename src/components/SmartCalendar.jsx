@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar as CalendarIcon, Clock, Target, Sparkles, BrainCircuit, ChevronRight, CheckCircle, AlertCircle, CalendarDays, ArrowRight } from 'lucide-react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI("AIzaSyD5aHDyevRFdNbj2Gf1x_-7Qd4-fYWCYZM");
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+import { Calendar as CalendarIcon, Clock, Target, Sparkles, BrainCircuit, ChevronRight, CheckCircle, AlertCircle, CalendarDays, ArrowRight, Zap } from 'lucide-react';
+import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
+import { generateCalendarPlanData } from '../config/gemini';
 
 const PremiumCard = ({ children, className = "" }) => (
-  <div className={`relative bg-white/80 backdrop-blur-xl rounded-[32px] border border-white/80 shadow-[0_8px_40px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-500 hover:shadow-[0_20px_60px_rgb(0,0,0,0.12)] hover:-translate-y-1 ${className}`}>
+  <div className={`relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl border border-white/80 dark:border-slate-700 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${className}`}>
     <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none"></div>
     <div className="relative z-10">{children}</div>
   </div>
@@ -22,105 +21,78 @@ const LoadingAI = ({ message, progress }) => (
       <BrainCircuit size={48} className="text-brand-500 animate-pulse" />
       <div className="absolute inset-0 bg-brand-400 rounded-full blur-xl opacity-20 animate-blob"></div>
     </div>
-    <h3 className="text-2xl font-black text-slate-800 tracking-tight mb-2">{message}</h3>
+    <h3 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight mb-2">{message}</h3>
     <p className="text-slate-500 font-medium text-center max-w-md">Running algorithmic timeline distribution across your remaining study days ({progress}%)...</p>
   </div>
 );
 
-const SmartCalendar = () => {
+const SmartCalendar = ({ user }) => {
   const [step, setStep] = useState('config'); // config, generating, calendar
-  const [examName, setExamName] = useState('');
-  const [examDate, setExamDate] = useState('');
+  const [examName, setExamName] = useState('Final Semester Exams (DSA & Databases)');
+  const [examDate, setExamDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 14);
+    return d.toISOString().split('T')[0];
+  });
   const [hoursPerDay, setHoursPerDay] = useState(3);
-  const [topicsText, setTopicsText] = useState('');
+  const [topicsText, setTopicsText] = useState('Dynamic Programming, Graph Theory, SQL Indexing, Concurrency Control');
   
   const [calendarPlan, setCalendarPlan] = useState([]);
   const [generationProgress, setGenerationProgress] = useState(0);
 
   const calculateDaysRemaining = () => {
-    if (!examDate) return 0;
+    if (!examDate) return 14;
     const target = new Date(examDate);
     const today = new Date();
-    const diffTime = Math.abs(target - today);
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffTime = target - today;
+    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return days > 0 ? days : 14;
   };
 
   const handleGenerate = async () => {
     const daysRemaining = calculateDaysRemaining();
-    if (daysRemaining <= 0 || !topicsText || !examName) return alert("Please fill out all fields with a valid future date.");
+    const eName = examName.trim() || 'Core Exam Preparation';
+    const topText = topicsText.trim() || 'Unit 1: Theory, Unit 2: Practice Problems, Unit 3: Advanced Review';
 
     setStep('generating');
+    setGenerationProgress(30);
     
-    // Simulate progress
-    let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.floor(Math.random() * 15) + 5;
-      if (progress > 90) progress = 90;
-      setGenerationProgress(progress);
-    }, 400);
-
-    const prompt = `You are an expert academic planning AI. The user is preparing for an exam named "${examName}" which is in exactly ${daysRemaining} days. 
-    They can study ${hoursPerDay} hours per day.
-    
-    Here is the raw list of topics/syllabus they need to cover:
-    "${topicsText}"
-    
-    Analyze the topics, identify the most critical ones that require more focus, and distribute everything intelligently across the ${daysRemaining} days.
-    Crucial Rules:
-    1. Group related topics into logical daily study sessions.
-    2. Identify high-priority/complex topics and mark them with "highFocus": true.
-    3. Reserve the last 15-20% of the days strictly for "Revision & Practice Exams".
-    
-    Return the result STRICTLY as a valid JSON array of objects. No markdown formatting.
-    Structure:
-    [
-      {
-        "dayNumber": 1,
-        "dateLabel": "Day 1",
-        "phase": "Learning",
-        "focusTitle": "Core Fundamentals of X",
-        "tasks": ["Read Chapter 1", "Complete practice set A"],
-        "highFocus": true
-      }
-    ]
-    Make sure to return an array containing an object for each of the ${daysRemaining} days.
-    `;
+      setGenerationProgress(prev => {
+        if (prev >= 90) return 90;
+        return prev + 30;
+      });
+    }, 200);
 
     try {
-      const result = await model.generateContent(prompt);
-      let text = result.response.text();
-      text = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      
-      let parsedPlan = JSON.parse(text);
-      if (!Array.isArray(parsedPlan)) {
-        if (parsedPlan && typeof parsedPlan === 'object' && Array.isArray(Object.values(parsedPlan)[0])) {
-          parsedPlan = Object.values(parsedPlan)[0];
-        } else {
-          throw new Error("Invalid JSON format from AI");
+      const plan = await generateCalendarPlanData(eName, daysRemaining, hoursPerDay, topText);
+      clearInterval(interval);
+      setGenerationProgress(100);
+
+      if (user?._id) {
+        try {
+          await axios.post(`${API_BASE_URL}/api/plans/calendar/${user._id}`, {
+            examName: eName,
+            examDate,
+            hoursPerDay,
+            schedule: plan
+          });
+        } catch (err) {
+          console.error("Failed to save calendar schedule to backend:", err);
         }
       }
       
-      clearInterval(interval);
-      setGenerationProgress(100);
-      
       setTimeout(() => {
-        setCalendarPlan(parsedPlan);
+        setCalendarPlan(plan);
         setStep('calendar');
-      }, 600);
-
+      }, 400);
     } catch (e) {
       console.error("Calendar Generation Error:", e);
       clearInterval(interval);
       setGenerationProgress(100);
-      
-      // Fallback
-      setCalendarPlan([
-        { dayNumber: 1, dateLabel: "Day 1", phase: "Learning", focusTitle: "Initial Setup & Basics", tasks: ["Review syllabus", "Start first module"] },
-        { dayNumber: 2, dateLabel: "Day 2", phase: "Learning", focusTitle: "Deep Dive Topic 1", tasks: ["Read core material", "Take notes"] },
-        { dayNumber: 3, dateLabel: "Day 3", phase: "Revision", focusTitle: "Mock Testing", tasks: ["Complete mock exam", "Review weak points"] }
-      ]);
-      
-      setTimeout(() => setStep('calendar'), 600);
+      const fallback = await generateCalendarPlanData(eName, daysRemaining, hoursPerDay, topText);
+      setCalendarPlan(fallback);
+      setStep('calendar');
     }
   };
 

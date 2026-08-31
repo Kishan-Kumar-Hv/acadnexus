@@ -155,15 +155,15 @@ const DashboardLayout = ({ user, setUser }) => {
         <div className="flex-1 p-8">
           {activeTab === 'dashboard' && <DashboardHome user={user} />}
           {activeTab === 'profile' && <Profile user={user} setUser={setUser} />}
-          {activeTab === 'planner' && <StudyPlanner />}
-          {activeTab === 'assessment' && <AptitudeAssessment />}
-          {activeTab === 'prep' && <AptitudePreparation />}
-          {activeTab === 'schedule' && <SmartCalendar />}
-          {activeTab === 'colleges' && <CollegeFinder />}
-          {activeTab === 'tutor' && <AITutor />}
-          {activeTab === 'flashcards' && <Flashcards />}
-          {activeTab === 'resources' && <ResourceHub />}
-          {activeTab === 'community' && <CommunityQA />}
+          {activeTab === 'planner' && <StudyPlanner user={user} />}
+          {activeTab === 'assessment' && <AptitudeAssessment user={user} />}
+          {activeTab === 'prep' && <AptitudePreparation user={user} />}
+          {activeTab === 'schedule' && <SmartCalendar user={user} />}
+          {activeTab === 'colleges' && <CollegeFinder user={user} />}
+          {activeTab === 'tutor' && <AITutor user={user} />}
+          {activeTab === 'flashcards' && <Flashcards user={user} />}
+          {activeTab === 'resources' && <ResourceHub user={user} />}
+          {activeTab === 'community' && <CommunityQA user={user} />}
           {/* Add more tabs when created */}
           {(activeTab !== 'dashboard' && activeTab !== 'profile' && activeTab !== 'planner' && activeTab !== 'assessment' && activeTab !== 'prep' && activeTab !== 'schedule' && activeTab !== 'colleges' && activeTab !== 'tutor' && activeTab !== 'flashcards' && activeTab !== 'resources' && activeTab !== 'community') && (
             <div className="flex flex-col items-center justify-center h-full text-center max-w-md mx-auto animate-fade-in-up">

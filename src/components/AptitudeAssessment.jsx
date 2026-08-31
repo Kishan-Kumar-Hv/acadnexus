@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Zap, Brain, ArrowRight, CheckCircle2, ChevronRight, Activity, Award, Sparkles, Target, Compass, RefreshCcw } from 'lucide-react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI("AIzaSyD5aHDyevRFdNbj2Gf1x_-7Qd4-fYWCYZM");
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
+import { generateAptitudeQuestionsData, generateCareerPathData } from '../config/gemini';
 
 // Questions will be generated dynamically.
 
@@ -43,15 +42,15 @@ const CAREER_RESULTS = {
 };
 
 const PremiumCard = ({ children, className = "" }) => (
-  <div className={`relative bg-white/80 backdrop-blur-xl rounded-[32px] border border-white/80 shadow-[0_8px_40px_rgb(0,0,0,0.08)] overflow-hidden ${className}`}>
+  <div className={`relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl border border-white/80 dark:border-slate-700 shadow-sm overflow-hidden ${className}`}>
     <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none"></div>
     {children}
   </div>
 );
 
-const AptitudeAssessment = () => {
+const AptitudeAssessment = ({ user }) => {
   const [step, setStep] = useState('intro'); // intro, generating_questions, quiz, processing, results
-  const [academicStage, setAcademicStage] = useState('');
+  const [academicStage, setAcademicStage] = useState('12th Grade / Pre-University');
   const [dynamicQuestions, setDynamicQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -59,49 +58,22 @@ const AptitudeAssessment = () => {
   const [resultCategory, setResultCategory] = useState(null);
 
   const handleStart = async () => {
-    if (!academicStage) {
-      alert("Please select your current academic stage first.");
-      return;
-    }
     setStep('generating_questions');
     
-    const prompt = `You are an expert career and aptitude counselor. Generate exactly 5 psychological and behavioral aptitude questions tailored specifically for a student in this academic stage: "${academicStage}". 
-    The questions must determine if they lean towards being Analytical, Creative, Social, or Practical.
-    Each question must have exactly 2 distinct options representing two different categories out of: "analytical", "creative", "social", "practical".
-    Return STRICTLY a JSON array of objects without any markdown formatting.
-    Structure:
-    [
-      {
-        "question": "Question text suitable for ${academicStage}",
-        "options": [
-          { "text": "Option A text", "category": "analytical" },
-          { "text": "Option B text", "category": "social" }
-        ]
-      }
-    ]`;
-    
     try {
-      const result = await model.generateContent(prompt);
-      let text = result.response.text();
-      text = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      let parsed = JSON.parse(text);
-      if (!Array.isArray(parsed)) {
-        if (parsed && typeof parsed === 'object' && Array.isArray(Object.values(parsed)[0])) {
-          parsed = Object.values(parsed)[0];
-        } else {
-          throw new Error("Invalid JSON");
-        }
-      }
-      setDynamicQuestions(parsed);
+      const questions = await generateAptitudeQuestionsData(academicStage);
+      setDynamicQuestions(questions.map(q => ({
+        question: q.scenario,
+        options: q.options
+      })));
       setCurrentQuestionIndex(0);
       setAnswers({});
-      setStep('quiz');
+      setTimeout(() => setStep('quiz'), 400);
     } catch (e) {
       console.error(e);
-      // Fallback questions
       setDynamicQuestions([
-        { question: "Fallback: How do you solve problems?", options: [{ text: "Use logic", category: "analytical" }, { text: "Use intuition", category: "creative" }] },
-        { question: "Fallback: What motivates you?", options: [{ text: "Helping others", category: "social" }, { text: "Building things", category: "practical" }] }
+        { question: "How do you naturally approach complex real-world challenges?", options: [{ text: "Break it down with logical algorithms and data metrics", category: "analytical" }, { text: "Brainstorm creative alternatives and novel user experiences", category: "creative" }] },
+        { question: "When collaborating in high-stakes environments, where is your greatest strength?", options: [{ text: "Aligning people and communicating strategic vision", category: "social" }, { text: "Hands-on execution and building concrete deliverables", category: "practical" }] }
       ]);
       setCurrentQuestionIndex(0);
       setAnswers({});
@@ -123,68 +95,50 @@ const AptitudeAssessment = () => {
   const calculateResults = async (finalAnswers) => {
     setStep('processing');
     
-    // Simulate processing loader while fetching from API
     let progress = 0;
     const progressInterval = setInterval(() => {
       progress += Math.floor(Math.random() * 10) + 2;
-      if (progress > 90) progress = 90; // hold at 90 until fetch completes
+      if (progress > 90) progress = 90;
       setProcessingProgress(progress);
     }, 400);
 
     try {
-      // Build the context string
-      const userProfileText = dynamicQuestions.map((q, idx) => {
-        const selectedOption = q.options.find(o => o.category === finalAnswers[idx]);
-        return `Q: ${q.question}\nA: ${selectedOption ? selectedOption.text : 'Unknown'}`;
-      }).join("\n\n");
+      const counts = { analytical: 0, creative: 0, social: 0, practical: 0 };
+      Object.values(finalAnswers).forEach(cat => {
+        if (counts[cat] !== undefined) counts[cat]++;
+      });
 
-      const prompt = `Based on the following user responses to a cognitive aptitude test, analyze their problem-solving style, communication preferences, and ideal work environment. 
-      Crucially, the user's current academic stage is: "${academicStage}".
-      Generate a list of 5 highly specific and diverse career paths OR immediate academic next steps (e.g., choosing Science/Commerce stream if in 10th grade, specific engineering roles if in college, etc.) that perfectly match this profile. Do not return just 2 or 3, return exactly 5 diverse options.
-      Return the result STRICTLY as a valid JSON array of objects with no markdown wrap.
-      Object structure:
-      {
-        "title": "Role or Academic Path",
-        "matchPercentage": 95,
-        "description": "2 sentences explaining why this fits them.",
-        "keyStrengths": ["Strength 1", "Strength 2", "Strength 3"]
-      }
-      
-      User Responses:
-      ${userProfileText}
-      `;
+      const dominant = Object.keys(counts).reduce((a, b) => counts[a] >= counts[b] ? a : b, 'analytical');
+      const careerPaths = await generateCareerPathData(dominant, academicStage);
 
-      const result = await model.generateContent(prompt);
-      let text = result.response.text();
-      text = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      let parsedResults = JSON.parse(text);
-      if (!Array.isArray(parsedResults)) {
-        if (parsedResults && typeof parsedResults === 'object' && Array.isArray(Object.values(parsedResults)[0])) {
-          parsedResults = Object.values(parsedResults)[0];
-        } else {
-          throw new Error("Invalid JSON format");
+      clearInterval(progressInterval);
+      setProcessingProgress(100);
+
+      if (user?._id) {
+        try {
+          await axios.post(`${API_BASE_URL}/api/assessments/score/${user._id}`, {
+            category: `Aptitude Assessment (${dominant})`,
+            score: counts[dominant] || 1,
+            total: Object.keys(finalAnswers).length || 5,
+            details: { dominantTrait: dominant, careerPaths }
+          });
+        } catch (err) {
+          console.error("Failed to save assessment score to backend:", err);
         }
       }
       
-      clearInterval(progressInterval);
-      setProcessingProgress(100);
-      
       setTimeout(() => {
-        setResultCategory(parsedResults); // Store the array
+        setResultCategory(careerPaths);
         setStep('results');
-      }, 800);
+      }, 500);
 
     } catch (e) {
-      console.error("Gemini Error:", e);
-      // Fallback
       clearInterval(progressInterval);
       setProcessingProgress(100);
       setResultCategory([
-        { title: "Software Engineer", matchPercentage: 92, description: "You have a highly logical mind and excel at breaking down complex problems.", keyStrengths: ["Logic", "Focus"] },
-        { title: "Data Analyst", matchPercentage: 88, description: "You are great at analyzing data and finding hidden patterns.", keyStrengths: ["Analysis", "Patience"] },
-        { title: "Product Manager", matchPercentage: 85, description: "You are a natural communicator and understand how to align teams.", keyStrengths: ["Leadership", "Strategy"] },
-        { title: "Systems Architect", matchPercentage: 80, description: "You prefer real-world applications and optimizing functional systems.", keyStrengths: ["Architecture", "Design"] },
-        { title: "UX Researcher", matchPercentage: 75, description: "You thrive on understanding human behavior and solving problems.", keyStrengths: ["Empathy", "Research"] }
+        { title: "Software Engineer", matchPercentage: 92, description: "You have a highly logical mind and excel at breaking down complex problems.", keyStrengths: ["Logic", "Focus", "Algorithms"] },
+        { title: "Data Analyst", matchPercentage: 88, description: "You are great at analyzing data and finding hidden patterns.", keyStrengths: ["Analysis", "Patience", "Modeling"] },
+        { title: "Product Manager", matchPercentage: 85, description: "You are a natural communicator and understand how to align teams.", keyStrengths: ["Leadership", "Strategy", "Execution"] }
       ]);
       setStep('results');
     }

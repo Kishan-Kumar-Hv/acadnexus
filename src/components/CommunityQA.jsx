@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, HelpCircle, MessageCircle, Send, ChevronDown, ChevronUp, Clock, Tag } from 'lucide-react';
+import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 const PremiumCard = ({ children, className = "" }) => (
   <div className={`relative bg-white/80 backdrop-blur-xl rounded-[32px] border border-white/80 shadow-[0_8px_40px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-500 ${className}`}>
@@ -10,7 +12,7 @@ const PremiumCard = ({ children, className = "" }) => (
 
 const initialQuestions = [
   {
-    id: 1,
+    _id: "demo-1",
     title: "I'm struggling with visualizing 4D matrices in Linear Algebra. Any tips?",
     description: "I understand 2D and 3D matrices perfectly, but when my professor brings up 4D tensors for machine learning, I completely lose the mental picture. Is there a trick to this?",
     domain: "Mathematics",
@@ -22,7 +24,7 @@ const initialQuestions = [
     isExpanded: false
   },
   {
-    id: 2,
+    _id: "demo-2",
     title: "How do you guys memorize the Krebs Cycle for Biology without going insane?",
     description: "I have my final in 3 days. I've tried flashcards but the enzyme names are just too similar. Please help!",
     domain: "Biology",
@@ -42,44 +44,82 @@ const CommunityQA = () => {
   const [isPosting, setIsPosting] = useState(false);
   const [answerInputs, setAnswerInputs] = useState({});
 
-  const handlePostQuestion = () => {
-    if (!newTitle.trim() || !newDesc.trim()) return;
-    
-    const newQ = {
-      id: Date.now(),
-      title: newTitle,
-      description: newDesc,
-      domain: newDomain,
-      timeAgo: "Just now",
-      answers: [],
-      isExpanded: false
-    };
-
-    setQuestions([newQ, ...questions]);
-    setNewTitle('');
-    setNewDesc('');
-    setIsPosting(false);
+  const fetchQuestions = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/community`);
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        setQuestions(res.data.map(q => ({ ...q, isExpanded: false })));
+      }
+    } catch (err) {
+      console.error("Failed to fetch community questions:", err);
+    }
   };
 
-  const handlePostAnswer = (qId) => {
+  useEffect(() => {
+    fetchQuestions();
+  }, []);
+
+  const handlePostQuestion = async () => {
+    if (!newTitle.trim() || !newDesc.trim()) return;
+    
+    try {
+      const res = await axios.post(`${API_BASE_URL}/api/community`, {
+        title: newTitle,
+        description: newDesc,
+        domain: newDomain,
+        authorName: "Anonymous Peer"
+      });
+      setQuestions([{ ...res.data, isExpanded: false }, ...questions]);
+      setNewTitle('');
+      setNewDesc('');
+      setIsPosting(false);
+    } catch (err) {
+      console.error("Failed to post question:", err);
+      // Fallback local update
+      const newQ = {
+        _id: String(Date.now()),
+        title: newTitle,
+        description: newDesc,
+        domain: newDomain,
+        timeAgo: "Just now",
+        answers: [],
+        isExpanded: false
+      };
+      setQuestions([newQ, ...questions]);
+      setNewTitle('');
+      setNewDesc('');
+      setIsPosting(false);
+    }
+  };
+
+  const handlePostAnswer = async (qId) => {
     const answerText = answerInputs[qId];
     if (!answerText || !answerText.trim()) return;
 
-    setQuestions(questions.map(q => {
-      if (q.id === qId) {
-        return {
-          ...q,
-          answers: [...q.answers, { text: answerText, timeAgo: "Just now" }]
-        };
-      }
-      return q;
-    }));
-
-    setAnswerInputs({ ...answerInputs, [qId]: '' });
+    try {
+      const res = await axios.post(`${API_BASE_URL}/api/community/${qId}/answer`, {
+        text: answerText,
+        authorName: "Anonymous Peer"
+      });
+      setQuestions(questions.map(q => q._id === qId ? { ...res.data, isExpanded: true } : q));
+      setAnswerInputs({ ...answerInputs, [qId]: '' });
+    } catch (err) {
+      console.error("Failed to post answer:", err);
+      setQuestions(questions.map(q => {
+        if ((q._id || q.id) === qId) {
+          return {
+            ...q,
+            answers: [...(q.answers || []), { text: answerText, timeAgo: "Just now" }]
+          };
+        }
+        return q;
+      }));
+      setAnswerInputs({ ...answerInputs, [qId]: '' });
+    }
   };
 
   const toggleExpand = (id) => {
-    setQuestions(questions.map(q => q.id === id ? { ...q, isExpanded: !q.isExpanded } : q));
+    setQuestions(questions.map(q => (q._id || q.id) === id ? { ...q, isExpanded: !q.isExpanded } : q));
   };
 
   return (
@@ -164,95 +204,98 @@ const CommunityQA = () => {
 
       {/* Questions Feed */}
       <div className="space-y-6">
-        {questions.map((q) => (
-          <PremiumCard key={q.id} className="p-0 overflow-hidden">
-             {/* Question Header */}
-             <div className="p-6 md:p-8 cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => toggleExpand(q.id)}>
-                <div className="flex items-start justify-between gap-4">
-                   <div className="flex-1">
-                     <div className="flex items-center gap-3 mb-3">
-                        <span className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-                          <Tag size={12} /> {q.domain}
-                        </span>
-                        <span className="flex items-center gap-1 text-xs font-bold text-slate-400">
-                          <Clock size={12} /> {q.timeAgo}
-                        </span>
-                     </div>
-                     <h2 className="text-xl md:text-2xl font-black text-slate-900 leading-tight mb-2">
-                       {q.title}
-                     </h2>
-                     <p className="text-slate-600 font-medium leading-relaxed line-clamp-2">
-                       {q.description}
-                     </p>
-                   </div>
-                   <div className="flex flex-col items-center gap-1 text-slate-400 shrink-0">
-                      <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center font-black text-lg text-slate-700">
-                         {q.answers.length}
-                      </div>
-                      <span className="text-xs font-bold uppercase tracking-widest">Ans</span>
-                   </div>
-                </div>
-                
-                <div className="mt-4 flex justify-center text-slate-300">
-                   {q.isExpanded ? <ChevronUp /> : <ChevronDown />}
-                </div>
-             </div>
-
-             {/* Answers Section */}
-             {q.isExpanded && (
-               <div className="border-t border-slate-100 bg-slate-50/50 p-6 md:p-8 animate-fade-in-up">
-                 <div className="mb-6">
-                    <h4 className="font-bold text-slate-900 mb-2">Full Description:</h4>
-                    <p className="text-slate-600 font-medium leading-relaxed bg-white p-4 rounded-xl border border-slate-200">
-                      {q.description}
-                    </p>
-                 </div>
-
-                 <h4 className="font-bold text-slate-800 flex items-center gap-2 mb-4">
-                    <MessageCircle size={18} className="text-indigo-500" /> Community Answers ({q.answers.length})
-                 </h4>
-
-                 <div className="space-y-4 mb-6">
-                   {q.answers.length === 0 ? (
-                     <p className="text-slate-500 font-medium italic text-center py-4">No answers yet. Be the first to help!</p>
-                   ) : (
-                     q.answers.map((ans, idx) => (
-                       <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative">
-                         <div className="absolute -left-3 top-5 w-6 h-6 rounded-full bg-indigo-100 border-4 border-slate-50 flex items-center justify-center">
-                           <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
-                         </div>
-                         <div className="flex justify-between items-start mb-2">
-                           <span className="text-sm font-bold text-slate-800">Anonymous Peer</span>
-                           <span className="text-xs font-medium text-slate-400">{ans.timeAgo}</span>
-                         </div>
-                         <p className="text-slate-700 font-medium leading-relaxed">{ans.text}</p>
+        {questions.map((q) => {
+          const qId = q._id || q.id;
+          return (
+            <PremiumCard key={qId} className="p-0 overflow-hidden">
+               {/* Question Header */}
+               <div className="p-6 md:p-8 cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => toggleExpand(qId)}>
+                  <div className="flex items-start justify-between gap-4">
+                     <div className="flex-1">
+                       <div className="flex items-center gap-3 mb-3">
+                          <span className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+                            <Tag size={12} /> {q.domain}
+                          </span>
+                          <span className="flex items-center gap-1 text-xs font-bold text-slate-400">
+                            <Clock size={12} /> {q.timeAgo || (q.createdAt ? new Date(q.createdAt).toLocaleDateString() : 'Recently')}
+                          </span>
                        </div>
-                     ))
-                   )}
-                 </div>
-
-                 {/* Submit Answer */}
-                 <div className="relative flex items-center">
-                    <input 
-                      type="text" 
-                      value={answerInputs[q.id] || ''}
-                      onChange={(e) => setAnswerInputs({...answerInputs, [q.id]: e.target.value})}
-                      onKeyDown={(e) => e.key === 'Enter' && handlePostAnswer(q.id)}
-                      placeholder="Write your answer anonymously to help out..."
-                      className="w-full pl-6 pr-16 py-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-slate-700 shadow-sm"
-                    />
-                    <button 
-                      onClick={() => handlePostAnswer(q.id)}
-                      disabled={!answerInputs[q.id]?.trim()}
-                      className="absolute right-2 p-2.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <Send size={16} />
-                    </button>
-                 </div>
+                       <h2 className="text-xl md:text-2xl font-black text-slate-900 leading-tight mb-2">
+                         {q.title}
+                       </h2>
+                       <p className="text-slate-600 font-medium leading-relaxed line-clamp-2">
+                         {q.description}
+                       </p>
+                     </div>
+                     <div className="flex flex-col items-center gap-1 text-slate-400 shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center font-black text-lg text-slate-700">
+                           {(q.answers || []).length}
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-widest">Ans</span>
+                     </div>
+                  </div>
+                  
+                  <div className="mt-4 flex justify-center text-slate-300">
+                     {q.isExpanded ? <ChevronUp /> : <ChevronDown />}
+                  </div>
                </div>
-             )}
-          </PremiumCard>
-        ))}
+
+               {/* Answers Section */}
+               {q.isExpanded && (
+                 <div className="border-t border-slate-100 bg-slate-50/50 p-6 md:p-8 animate-fade-in-up">
+                   <div className="mb-6">
+                      <h4 className="font-bold text-slate-900 mb-2">Full Description:</h4>
+                      <p className="text-slate-600 font-medium leading-relaxed bg-white p-4 rounded-xl border border-slate-200">
+                        {q.description}
+                      </p>
+                   </div>
+
+                   <h4 className="font-bold text-slate-800 flex items-center gap-2 mb-4">
+                      <MessageCircle size={18} className="text-indigo-500" /> Community Answers ({(q.answers || []).length})
+                   </h4>
+
+                   <div className="space-y-4 mb-6">
+                     {(q.answers || []).length === 0 ? (
+                       <p className="text-slate-500 font-medium italic text-center py-4">No answers yet. Be the first to help!</p>
+                     ) : (
+                       q.answers.map((ans, idx) => (
+                         <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative">
+                           <div className="absolute -left-3 top-5 w-6 h-6 rounded-full bg-indigo-100 border-4 border-slate-50 flex items-center justify-center">
+                             <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
+                           </div>
+                           <div className="flex justify-between items-start mb-2">
+                             <span className="text-sm font-bold text-slate-800">{ans.authorName || 'Anonymous Peer'}</span>
+                             <span className="text-xs font-medium text-slate-400">{ans.timeAgo || (ans.createdAt ? new Date(ans.createdAt).toLocaleDateString() : 'Just now')}</span>
+                           </div>
+                           <p className="text-slate-700 font-medium leading-relaxed">{ans.text}</p>
+                         </div>
+                       ))
+                     )}
+                   </div>
+
+                   {/* Submit Answer */}
+                   <div className="relative flex items-center">
+                      <input 
+                        type="text" 
+                        value={answerInputs[qId] || ''}
+                        onChange={(e) => setAnswerInputs({...answerInputs, [qId]: e.target.value})}
+                        onKeyDown={(e) => e.key === 'Enter' && handlePostAnswer(qId)}
+                        placeholder="Write your answer anonymously to help out..."
+                        className="w-full pl-6 pr-16 py-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-slate-700 shadow-sm"
+                      />
+                      <button 
+                        onClick={() => handlePostAnswer(qId)}
+                        disabled={!answerInputs[qId]?.trim()}
+                        className="absolute right-2 p-2.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Send size={16} />
+                      </button>
+                   </div>
+                 </div>
+               )}
+            </PremiumCard>
+          );
+        })}
       </div>
 
     </div>
