@@ -10,7 +10,9 @@ const createTransporter = () => {
   }
 
   return nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE || 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: { user, pass }
   });
 };
