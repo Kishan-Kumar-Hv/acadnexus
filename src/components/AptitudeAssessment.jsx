@@ -167,23 +167,23 @@ const AptitudeAssessment = ({ user }) => {
       </div>
 
       {step === 'intro' && (
-        <div className="relative rounded-[32px] overflow-hidden shadow-[0_8px_40px_rgb(0,0,0,0.08)] group">
+        <div className="relative rounded-2xl sm:rounded-[32px] overflow-hidden shadow-[0_8px_40px_rgb(0,0,0,0.08)] group">
           <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=2000" alt="Team Brainstorming" className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-1000" />
           <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-white/60 md:to-transparent"></div>
           
-          <div className="relative z-10 p-10 lg:p-14 flex flex-col md:flex-row gap-10 items-center justify-between">
-            <div className="flex-1 text-left">
-              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-lg border border-slate-100">
-                 <Brain size={32} className="text-brand-500" />
+          <div className="relative z-10 p-5 sm:p-10 lg:p-14 flex flex-col md:flex-row gap-6 sm:gap-10 items-center justify-between">
+            <div className="flex-1 text-left w-full">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-2xl flex items-center justify-center mb-4 sm:mb-6 shadow-lg border border-slate-100">
+                 <Brain size={28} className="text-brand-500" />
               </div>
-              <h2 className="text-4xl lg:text-5xl font-black text-slate-900 mb-4 tracking-tight">Unlock Your True Potential</h2>
-              <p className="text-lg text-slate-600 mb-8 max-w-xl leading-relaxed backdrop-blur-sm bg-white/40 p-2 rounded-xl">
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 mb-3 sm:mb-4 tracking-tight">Unlock Your True Potential</h2>
+              <p className="text-sm sm:text-lg text-slate-600 mb-6 sm:mb-8 max-w-xl leading-relaxed backdrop-blur-sm bg-white/40 p-2 rounded-xl">
                 Our proprietary AI assessment analyzes your problem-solving style, communication preferences, and cognitive instincts to map you to the most lucrative and fulfilling career trajectories.
               </p>
               
-              <div className="max-w-md bg-white/90 backdrop-blur-xl p-8 rounded-[24px] border border-white shadow-2xl">
-                 <label className="text-sm font-black text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <Brain size={18} className="text-brand-500" /> Current Academic Stage
+              <div className="w-full max-w-md bg-white/90 backdrop-blur-xl p-5 sm:p-8 rounded-2xl sm:rounded-[24px] border border-white shadow-2xl">
+                 <label className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-widest mb-2 sm:mb-3 flex items-center gap-2">
+                    <Brain size={16} className="text-brand-500" /> Current Academic Stage
                  </label>
                  <select 
                     value={academicStage}
@@ -262,31 +262,31 @@ const AptitudeAssessment = ({ user }) => {
             ></div>
           </div>
 
-          <PremiumCard className="p-8 md:p-12">
-            <h3 className="text-2xl md:text-3xl font-black text-slate-900 mb-8 leading-tight">
+          <PremiumCard className="p-5 sm:p-8 md:p-12">
+            <h3 className="text-lg sm:text-2xl md:text-3xl font-black text-slate-900 mb-5 sm:mb-8 leading-tight">
               {currentQuestion.question}
             </h3>
 
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4">
               {currentQuestion.options.map((option, idx) => {
                 const isSelected = answers[currentQuestionIndex] === option.category;
                 return (
                   <button
                     key={idx}
                     onClick={() => handleOptionSelect(option.category)}
-                    className={`text-left p-6 rounded-2xl border-2 transition-all duration-300 flex items-center justify-between group
+                    className={`text-left p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 flex items-center justify-between gap-3 group
                       ${isSelected 
                         ? 'border-brand-500 bg-brand-50 shadow-[0_8px_20px_rgb(0,0,0,0.06)]' 
                         : 'border-slate-100 bg-white hover:border-brand-200 hover:bg-slate-50 hover:shadow-sm'
                       }`}
                   >
-                    <span className={`text-lg font-semibold ${isSelected ? 'text-brand-800' : 'text-slate-700'}`}>
+                    <span className={`text-sm sm:text-lg font-semibold flex-1 ${isSelected ? 'text-brand-800' : 'text-slate-700'}`}>
                       {option.text}
                     </span>
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
+                    <div className={`w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors
                       ${isSelected ? 'border-brand-500 bg-brand-500' : 'border-slate-300 group-hover:border-brand-300'}
                     `}>
-                      {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-white"></div>}
+                      {isSelected && <div className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white"></div>}
                     </div>
                   </button>
                 )
@@ -326,20 +326,20 @@ const AptitudeAssessment = ({ user }) => {
             {resultCategory.map((career, idx) => (
               <PremiumCard key={idx} className="p-0 overflow-hidden relative group">
                 <div className={`absolute top-0 left-0 w-2 h-full ${idx === 0 ? 'bg-gradient-to-b from-emerald-400 to-emerald-600' : 'bg-gradient-to-b from-brand-400 to-brand-600'}`}></div>
-                <div className="p-6 md:p-8">
-                  <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-inner ${idx === 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-brand-50 text-brand-600'}`}>
+                <div className="p-4 sm:p-6 md:p-8">
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-black text-lg sm:text-xl shadow-inner shrink-0 ${idx === 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-brand-50 text-brand-600'}`}>
                          #{idx + 1}
                       </div>
-                      <h3 className="text-2xl font-black text-slate-900">{career.title}</h3>
+                      <h3 className="text-lg sm:text-2xl font-black text-slate-900">{career.title}</h3>
                     </div>
-                    <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-100 shadow-sm">
-                       <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Match</span>
-                       <span className={`text-2xl font-black ${idx === 0 ? 'text-emerald-500' : 'text-brand-500'}`}>{career.matchPercentage}%</span>
+                    <div className="self-start sm:self-auto flex items-center gap-2 bg-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-slate-100 shadow-sm">
+                       <span className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-widest">Match</span>
+                       <span className={`text-lg sm:text-2xl font-black ${idx === 0 ? 'text-emerald-500' : 'text-brand-500'}`}>{career.matchPercentage}%</span>
                     </div>
                   </div>
-                  <p className="text-slate-600 text-lg mb-6 leading-relaxed md:ml-16">
+                  <p className="text-slate-600 text-sm sm:text-lg mb-4 sm:mb-6 leading-relaxed md:ml-16">
                     {career.description}
                   </p>
                   <div className="md:ml-16">

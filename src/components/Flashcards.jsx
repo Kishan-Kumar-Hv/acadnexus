@@ -121,7 +121,7 @@ const Flashcards = () => {
       </div>
 
       {/* Hero Banner */}
-      <div className="relative rounded-[32px] overflow-hidden shadow-[0_8px_40px_rgb(0,0,0,0.08)] mb-8 group">
+      <div className="relative rounded-2xl sm:rounded-[32px] overflow-hidden shadow-[0_8px_40px_rgb(0,0,0,0.08)] mb-6 sm:mb-8 group">
          <img 
            src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=2000" 
            alt="Flashcards and Studying" 
@@ -129,23 +129,23 @@ const Flashcards = () => {
          />
          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-white/40 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-900/40"></div>
          
-         <div className="relative z-10 p-8 lg:p-12 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-md text-emerald-700 dark:text-emerald-300 text-sm font-bold mb-4 shadow-sm border border-emerald-100 dark:border-emerald-900/40">
-              <Layers className="text-emerald-500" size={16} /> Spaced Repetition & Active Recall Engine
+         <div className="relative z-10 p-5 sm:p-8 lg:p-12 max-w-3xl">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-md text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-bold mb-3 sm:mb-4 shadow-sm border border-emerald-100 dark:border-emerald-900/40">
+              <Layers className="text-emerald-500" size={16} /> Spaced Repetition Engine
             </div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.1] mb-2">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.1] mb-2">
               AI Flashcard <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">Generator</span>
             </h1>
-            <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 font-medium">
+            <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-300 font-medium">
               Transform syllabus notes or target topics into 3D active recall decks for fast exam mastery.
             </p>
          </div>
       </div>
 
       {step === 'config' && (
-        <PremiumCard className="p-8 md:p-10 max-w-2xl mx-auto space-y-6">
+        <PremiumCard className="p-5 sm:p-8 md:p-10 max-w-2xl mx-auto space-y-6">
           <div>
-            <label className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest mb-2.5 flex items-center gap-2">
+            <label className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest mb-2 flex items-center gap-2">
               <FileText size={18} className="text-emerald-500" /> Topic or Chapter Notes
             </label>
             <textarea 
@@ -153,22 +153,22 @@ const Flashcards = () => {
               placeholder="E.g. Type 'Newton's Laws of Motion' or paste raw subject notes..." 
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-900 px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 transition-all outline-none font-medium text-slate-800 dark:text-white placeholder-slate-400 resize-none leading-relaxed"
+              className="w-full bg-slate-50 dark:bg-slate-900 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 transition-all outline-none font-medium text-slate-800 dark:text-white placeholder-slate-400 resize-none leading-relaxed text-sm sm:text-base"
             />
           </div>
 
           {/* Quick Deck Presets */}
           <div>
-            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">
               Or pick a popular topic deck:
             </span>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {PRESET_DECKS.map((preset, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => handleGenerate(preset)}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 font-medium transition-colors"
+                  className="text-xs px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 font-medium transition-colors"
                 >
                   {preset}
                 </button>
@@ -178,7 +178,7 @@ const Flashcards = () => {
 
           <button 
              onClick={() => handleGenerate()}
-             className="w-full py-4 rounded-xl font-black text-base text-white bg-slate-900 dark:bg-emerald-600 hover:bg-emerald-600 dark:hover:bg-emerald-500 transition-all flex items-center justify-center gap-2.5 shadow-lg active:scale-98"
+             className="w-full py-3.5 sm:py-4 rounded-xl font-black text-sm sm:text-base text-white bg-slate-900 dark:bg-emerald-600 hover:bg-emerald-600 dark:hover:bg-emerald-500 transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98"
           >
              Generate Flashcard Deck <Play size={18} />
           </button>
@@ -237,15 +237,15 @@ const Flashcards = () => {
 
            {/* Flashcard 3D Container */}
            <div 
-             className="w-full aspect-[16/10] md:aspect-[16/9] perspective-1000 cursor-pointer select-none" 
+             className="w-full min-h-[300px] sm:min-h-[340px] md:aspect-[16/9] perspective-1000 cursor-pointer select-none" 
              onClick={() => setIsFlipped(!isFlipped)}
            >
-              <div className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+              <div className={`relative w-full h-full min-h-[300px] sm:min-h-[340px] transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
                  
                  {/* Front Side */}
-                 <div className="absolute inset-0 backface-hidden bg-white dark:bg-slate-800 rounded-3xl border-2 border-slate-200/80 dark:border-slate-700 shadow-xl flex flex-col justify-between p-8 md:p-10 text-center">
+                 <div className="absolute inset-0 backface-hidden bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl border-2 border-slate-200/80 dark:border-slate-700 shadow-xl flex flex-col justify-between p-5 sm:p-8 md:p-10 text-center">
                     <div className="flex items-center justify-between w-full">
-                       <span className="text-[11px] font-bold tracking-widest uppercase text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-md">
+                       <span className="text-[10px] sm:text-[11px] font-bold tracking-widest uppercase text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 sm:px-2.5 py-1 rounded-md">
                          Question / Concept
                        </span>
                        <span className="text-xs text-slate-400 flex items-center gap-1 font-medium">
@@ -253,19 +253,19 @@ const Flashcards = () => {
                        </span>
                     </div>
 
-                    <h2 className="text-xl md:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white leading-snug my-auto px-2">
+                    <h2 className="text-lg sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white leading-snug my-auto px-1 sm:px-2 py-4">
                       {cards[currentIndex]?.front}
                     </h2>
 
-                    <div className="text-slate-400 text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1.5">
+                    <div className="text-slate-400 text-[11px] sm:text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1.5">
                        <Eye size={14} className="text-emerald-500" /> Tap or press space to flip
                     </div>
                  </div>
 
                  {/* Back Side */}
-                 <div className="absolute inset-0 backface-hidden rotate-y-180 bg-slate-900 dark:bg-slate-950 rounded-3xl border-2 border-slate-700 shadow-xl flex flex-col justify-between p-8 md:p-10 text-center">
+                 <div className="absolute inset-0 backface-hidden rotate-y-180 bg-slate-900 dark:bg-slate-950 rounded-2xl sm:rounded-3xl border-2 border-slate-700 shadow-xl flex flex-col justify-between p-5 sm:p-8 md:p-10 text-center">
                     <div className="flex items-center justify-between w-full">
-                       <span className="text-[11px] font-bold tracking-widest uppercase text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-800/40">
+                       <span className="text-[10px] sm:text-[11px] font-bold tracking-widest uppercase text-emerald-400 bg-emerald-950/60 px-2 sm:px-2.5 py-1 rounded-md border border-emerald-800/40">
                          Answer & Explanation
                        </span>
                        <span className="text-xs text-slate-400 flex items-center gap-1 font-medium">
@@ -273,11 +273,11 @@ const Flashcards = () => {
                        </span>
                     </div>
 
-                    <p className="text-lg md:text-xl lg:text-2xl font-medium text-slate-100 leading-relaxed my-auto px-2">
+                    <p className="text-sm sm:text-lg md:text-xl font-medium text-slate-100 leading-relaxed my-auto px-1 sm:px-2 py-4 overflow-y-auto max-h-[220px]">
                       {cards[currentIndex]?.back}
                     </p>
 
-                    <div className="text-slate-400 text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1.5">
+                    <div className="text-slate-400 text-[11px] sm:text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1.5">
                        <EyeOff size={14} /> Tap to flip back
                     </div>
                  </div>
@@ -286,32 +286,32 @@ const Flashcards = () => {
            </div>
 
            {/* Navigation and Mastery Actions */}
-           <div className="flex items-center justify-between w-full px-4 pt-2">
+           <div className="flex items-center justify-between w-full px-1 sm:px-4 pt-2 gap-2">
               <button 
                 onClick={handlePrev} 
                 disabled={currentIndex === 0}
-                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-700 dark:text-slate-200 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shrink-0"
               >
-                 <ArrowLeft size={16} /> Prev
+                 <ArrowLeft size={16} /> <span className="hidden xs:inline">Prev</span>
               </button>
 
               <button
                 onClick={() => toggleMastered(currentIndex)}
-                className={`px-4 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+                className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1 border truncate ${
                   masteredCards.has(currentIndex)
                     ? 'bg-amber-500 text-white border-amber-600 shadow-md'
                     : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-amber-300'
                 }`}
               >
-                {masteredCards.has(currentIndex) ? '✓ Mastered' : 'Mark as Mastered'}
+                {masteredCards.has(currentIndex) ? '✓ Mastered' : 'Mastered'}
               </button>
 
               <button 
                 onClick={handleNext} 
                 disabled={currentIndex === cards.length - 1}
-                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20 text-xs sm:text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
               >
-                 Next <ArrowRight size={16} />
+                 <span className="hidden xs:inline">Next</span> <ArrowRight size={16} />
               </button>
            </div>
 

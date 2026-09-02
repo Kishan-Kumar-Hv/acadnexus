@@ -100,8 +100,8 @@ const CollegeFinder = () => {
       </div>
 
       {step === 'config' && (
-        <PremiumCard className="p-6 md:p-10 max-w-3xl mx-auto">
-           <div className="space-y-6">
+        <PremiumCard className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto">
+           <div className="space-y-5 sm:space-y-6">
 
              {/* Quick Match Presets */}
              <div>
@@ -287,35 +287,35 @@ const CollegeFinder = () => {
       )}
 
       {step === 'results' && (
-        <div className="space-y-8 animate-fade-in-up">
-           <div className="flex items-center justify-between mb-4">
+        <div className="space-y-6 sm:space-y-8 animate-fade-in-up">
+           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
              <div>
-               <h2 className="text-3xl font-black text-slate-900 tracking-tight">Your Campus Matches</h2>
-               <p className="text-slate-500 font-medium mt-1">Colleges that fit your exact vibe and academic goals.</p>
+               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Your Campus Matches</h2>
+               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">Colleges that fit your exact vibe and academic goals.</p>
              </div>
              <button 
                onClick={() => setStep('config')}
-               className="px-4 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-600 hover:text-slate-900 shadow-sm transition-all flex items-center gap-2"
+               className="self-start sm:self-auto px-3.5 py-1.5 sm:px-4 sm:py-2 bg-white border border-slate-200 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 shadow-sm transition-all flex items-center gap-2"
              >
-               <RefreshCcw size={16} /> Adjust Preferences
+               <RefreshCcw size={14} /> Adjust Preferences
              </button>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8">
              {results.map((college, idx) => (
                <PremiumCard key={idx} className="p-0 overflow-hidden flex flex-col h-full group">
                  <div className={`h-3 w-full ${idx === 0 ? 'bg-gradient-to-r from-orange-400 to-orange-600' : 'bg-gradient-to-r from-blue-400 to-blue-600'}`}></div>
-                 <div className="p-8 flex-1 flex flex-col">
-                    <div className="flex justify-between items-start mb-6">
-                       <div>
-                         <h3 className="text-2xl font-black text-slate-900 leading-tight group-hover:text-orange-600 transition-colors">{college.name}</h3>
-                         <span className="text-slate-500 font-bold flex items-center gap-1 mt-2">
-                           <MapPin size={16} /> {college.location}
+                 <div className="p-5 sm:p-8 flex-1 flex flex-col">
+                    <div className="flex justify-between items-start gap-3 mb-4 sm:mb-6">
+                       <div className="flex-1 min-w-0">
+                         <h3 className="text-lg sm:text-2xl font-black text-slate-900 leading-tight group-hover:text-orange-600 transition-colors truncate sm:whitespace-normal">{college.name}</h3>
+                         <span className="text-slate-500 font-bold flex items-center gap-1 mt-1 sm:mt-2 text-xs sm:text-sm">
+                           <MapPin size={14} className="shrink-0" /> {college.location}
                          </span>
                        </div>
-                       <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 text-center shrink-0">
-                         <span className="block text-[10px] font-black uppercase text-slate-400 tracking-widest">Match</span>
-                         <span className={`text-xl font-black ${idx === 0 ? 'text-orange-500' : 'text-blue-500'}`}>{college.matchPercentage}%</span>
+                       <div className="bg-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl shadow-sm border border-slate-100 text-center shrink-0">
+                         <span className="block text-[9px] sm:text-[10px] font-black uppercase text-slate-400 tracking-widest">Match</span>
+                         <span className={`text-base sm:text-xl font-black ${idx === 0 ? 'text-orange-500' : 'text-blue-500'}`}>{college.matchPercentage}%</span>
                        </div>
                     </div>
                     

@@ -292,42 +292,42 @@ const DashboardHome = ({ user }) => {
            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-white/40 md:to-transparent dark:from-slate-900 dark:via-slate-900/95 dark:to-transparent"></div>
          </div>
          
-         <div className="relative z-10 p-6 lg:p-8 flex flex-col lg:flex-row justify-between items-center gap-6 h-full">
-           <div className="flex-1 max-w-2xl">
-             <div className="flex items-center gap-3.5 mb-4">
-                <img 
-                  src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=200" 
-                  alt="Profile" 
-                  className="w-12 h-12 rounded-full border-2 border-white shadow-md object-cover"
-                />
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-brand-100 dark:border-brand-900/40 text-brand-700 dark:text-brand-300 text-xs font-semibold shadow-sm">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-500"></span>
-                  </span>
-                  Tracking {pendingTasks.length} pending missions
-                </div>
-             </div>
-             
-             <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-snug">
-               {getGreeting()}, {user?.name || 'Kishan'}!
-             </h1>
-             <p className="text-slate-600 dark:text-slate-300 mt-3 font-medium text-sm sm:text-base leading-relaxed max-w-xl backdrop-blur-sm bg-white/30 dark:bg-slate-900/40 p-2 rounded-xl border border-white/50 dark:border-slate-700/50">
-               You are <strong className="text-emerald-600 dark:text-emerald-400 font-bold">{dailyProgress}%</strong> through your daily goals. Keep pushing, completing your tasks builds momentum towards your success.
-             </p>
-           </div>
-
-           {/* Daily Goal Ring Hero */}
-           <div className="relative group/ring shrink-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-5 rounded-2xl border border-white dark:border-slate-700 shadow-lg dark:shadow-none">
-              <ActivityRing progress={dailyProgress} size={120} strokeWidth={10} colorClass="text-brand-500 dark:text-brand-400" trackClass="text-slate-200 dark:text-slate-700" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-extrabold text-slate-800 dark:text-white">
-                   <AnimatedCounter end={dailyProgress} suffix="%" />
-                </span>
-                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">Done</span>
+          <div className="relative z-10 p-5 sm:p-6 lg:p-8 flex flex-col lg:flex-row justify-between items-center gap-6 h-full">
+            <div className="flex-1 max-w-2xl text-center lg:text-left">
+              <div className="flex items-center justify-center lg:justify-start gap-3 mb-3 sm:mb-4">
+                 <img 
+                   src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=200" 
+                   alt="Profile" 
+                   className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white shadow-md object-cover"
+                 />
+                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-brand-100 dark:border-brand-900/40 text-brand-700 dark:text-brand-300 text-xs font-semibold shadow-sm">
+                   <span className="relative flex h-2 w-2">
+                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                     <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+                   </span>
+                   Tracking {pendingTasks.length} pending missions
+                 </div>
               </div>
-           </div>
-         </div>
+              
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-snug">
+                {getGreeting()}, {user?.name || 'Kishan'}!
+              </h1>
+              <p className="text-slate-600 dark:text-slate-300 mt-2 sm:mt-3 font-medium text-xs sm:text-sm md:text-base leading-relaxed max-w-xl backdrop-blur-sm bg-white/30 dark:bg-slate-900/40 p-2 sm:p-2.5 rounded-xl border border-white/50 dark:border-slate-700/50 mx-auto lg:mx-0">
+                You are <strong className="text-emerald-600 dark:text-emerald-400 font-bold">{dailyProgress}%</strong> through your daily goals. Keep pushing!
+              </p>
+            </div>
+
+            {/* Daily Goal Ring Hero */}
+            <div className="relative group/ring shrink-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white dark:border-slate-700 shadow-lg dark:shadow-none">
+               <ActivityRing progress={dailyProgress} size={100} strokeWidth={8} colorClass="text-brand-500 dark:text-brand-400" trackClass="text-slate-200 dark:text-slate-700" />
+               <div className="absolute inset-0 flex flex-col items-center justify-center">
+                 <span className="text-xl sm:text-2xl font-extrabold text-slate-800 dark:text-white">
+                    <AnimatedCounter end={dailyProgress} suffix="%" />
+                 </span>
+                 <span className="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">Done</span>
+               </div>
+            </div>
+          </div>
       </div>
 
       {/* Bento Grid Layout */}
@@ -402,50 +402,50 @@ const DashboardHome = ({ user }) => {
       <PremiumCard className="p-0 overflow-hidden flex flex-col md:flex-row border-t border-t-white/90">
         
         {/* Sidebar for Task Categories */}
-        <div className="w-full md:w-72 bg-slate-50/50 dark:bg-slate-800/50 border-r border-slate-200/50 dark:border-slate-700/50 p-6 flex flex-col relative z-10">
-          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight">Mission Control</h2>
+        <div className="w-full md:w-72 bg-slate-50/50 dark:bg-slate-800/50 border-b md:border-b-0 md:border-r border-slate-200/50 dark:border-slate-700/50 p-4 sm:p-6 flex flex-col relative z-10">
+          <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white mb-4 sm:mb-6 tracking-tight">Mission Control</h2>
           
-          <div className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-1 gap-2.5 sm:gap-4">
             <button 
               onClick={() => setActiveTab('pending')}
-              className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${
+              className={`w-full flex items-center justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all duration-300 ${
                 activeTab === 'pending' 
-                  ? 'bg-white dark:bg-slate-700 shadow-[0_8px_20px_rgb(0,0,0,0.06)] dark:shadow-none border border-white dark:border-slate-600 scale-105' 
+                  ? 'bg-white dark:bg-slate-700 shadow-[0_8px_20px_rgb(0,0,0,0.06)] dark:shadow-none border border-white dark:border-slate-600 sm:scale-105' 
                   : 'hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
               }`}
             >
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-xl ${activeTab === 'pending' ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500'}`}>
-                  <Activity size={20} />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl ${activeTab === 'pending' ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500'}`}>
+                  <Activity size={18} />
                 </div>
-                <span className={`font-bold ${activeTab === 'pending' ? 'text-slate-900 dark:text-white' : ''}`}>Pending Tasks</span>
+                <span className={`font-bold text-xs sm:text-sm ${activeTab === 'pending' ? 'text-slate-900 dark:text-white' : ''}`}>Pending</span>
               </div>
-              <span className={`text-sm font-black px-2.5 py-1 rounded-lg ${activeTab === 'pending' ? 'bg-brand-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}>
+              <span className={`text-xs font-black px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg ${activeTab === 'pending' ? 'bg-brand-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}>
                 {pendingTasks.length}
               </span>
             </button>
 
             <button 
               onClick={() => setActiveTab('completed')}
-              className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${
+              className={`w-full flex items-center justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all duration-300 ${
                 activeTab === 'completed' 
-                  ? 'bg-white dark:bg-slate-700 shadow-[0_8px_20px_rgb(0,0,0,0.06)] dark:shadow-none border border-white dark:border-slate-600 scale-105' 
+                  ? 'bg-white dark:bg-slate-700 shadow-[0_8px_20px_rgb(0,0,0,0.06)] dark:shadow-none border border-white dark:border-slate-600 sm:scale-105' 
                   : 'hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
               }`}
             >
-              <div className="flex items-center gap-3">
-                 <div className={`p-2 rounded-xl ${activeTab === 'completed' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500'}`}>
-                  <CheckCircle size={20} />
+              <div className="flex items-center gap-2 sm:gap-3">
+                 <div className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl ${activeTab === 'completed' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500'}`}>
+                  <CheckCircle size={18} />
                 </div>
-                <span className={`font-bold ${activeTab === 'completed' ? 'text-slate-900 dark:text-white' : ''}`}>Completed</span>
+                <span className={`font-bold text-xs sm:text-sm ${activeTab === 'completed' ? 'text-slate-900 dark:text-white' : ''}`}>Done</span>
               </div>
-              <span className={`text-sm font-black px-2.5 py-1 rounded-lg ${activeTab === 'completed' ? 'bg-emerald-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}>
+              <span className={`text-xs font-black px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg ${activeTab === 'completed' ? 'bg-emerald-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}>
                 {completedTasks.length}
               </span>
             </button>
           </div>
           
-          <div className="mt-auto pt-8">
+          <div className="mt-4 sm:mt-auto pt-3 sm:pt-8">
             {isAdding ? (
               <form onSubmit={handleAddTask} className="flex flex-col gap-2 animate-fade-in-up">
                 <input 
@@ -453,24 +453,24 @@ const DashboardHome = ({ user }) => {
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
                   placeholder="Task title..." 
-                  className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
                   autoFocus
                 />
                 <div className="flex gap-2">
-                  <button type="submit" className="flex-1 py-2 bg-brand-600 text-white font-bold rounded-xl text-sm hover:bg-brand-700">Save</button>
-                  <button type="button" onClick={() => setIsAdding(false)} className="flex-1 py-2 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm hover:bg-slate-300 dark:hover:bg-slate-600">Cancel</button>
+                  <button type="submit" className="flex-1 py-2 bg-brand-600 text-white font-bold rounded-xl text-xs sm:text-sm hover:bg-brand-700">Save</button>
+                  <button type="button" onClick={() => setIsAdding(false)} className="flex-1 py-2 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-xs sm:text-sm hover:bg-slate-300 dark:hover:bg-slate-600">Cancel</button>
                 </div>
               </form>
             ) : (
-              <button onClick={() => setIsAdding(true)} className="w-full py-4 bg-slate-900 dark:bg-brand-600 hover:bg-brand-600 dark:hover:bg-brand-500 text-white font-bold rounded-2xl transition-colors shadow-lg active:scale-95 flex items-center justify-center gap-2">
-                <span className="text-xl">+</span> Add New Mission
+              <button onClick={() => setIsAdding(true)} className="w-full py-3 sm:py-4 bg-slate-900 dark:bg-brand-600 hover:bg-brand-600 dark:hover:bg-brand-500 text-white font-bold rounded-xl sm:rounded-2xl transition-colors shadow-lg active:scale-95 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-base">
+                <span className="text-lg sm:text-xl">+</span> Add Mission
               </button>
             )}
           </div>
         </div>
 
         {/* Task List Content Area */}
-        <div className="flex-1 p-8 lg:p-10 bg-white/40 dark:bg-slate-900/40">
+        <div className="flex-1 p-4 sm:p-8 lg:p-10 bg-white/40 dark:bg-slate-900/40">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
               {activeTab === 'pending' ? 'Action Items' : 'Accomplishments'}

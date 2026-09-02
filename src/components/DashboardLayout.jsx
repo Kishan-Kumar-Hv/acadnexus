@@ -169,7 +169,7 @@ const DashboardLayout = ({ user, setUser }) => {
         </header>
 
         {/* Dynamic Page Content */}
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-3 sm:p-6 md:p-8 w-full max-w-full overflow-x-hidden">
           {activeTab === 'dashboard' && <DashboardHome user={user} />}
           {activeTab === 'profile' && <Profile user={user} setUser={setUser} />}
           {activeTab === 'planner' && <StudyPlanner user={user} />}

@@ -182,37 +182,37 @@ const SmartCalendar = ({ user }) => {
           </div>
 
           <div className="space-y-6">
-            <PremiumCard className="p-8 bg-slate-900 border-slate-800 text-white relative overflow-hidden h-full flex flex-col">
+            <PremiumCard className="p-5 sm:p-8 bg-slate-900 border-slate-800 text-white relative overflow-hidden h-full flex flex-col">
                <div className="absolute top-0 right-0 w-40 h-40 bg-brand-500/20 rounded-full blur-3xl"></div>
                
-               <h3 className="text-lg font-bold text-slate-300 mb-8 uppercase tracking-widest flex items-center gap-2">
+               <h3 className="text-sm sm:text-lg font-bold text-slate-300 mb-6 sm:mb-8 uppercase tracking-widest flex items-center gap-2">
                  <Clock size={18} className="text-brand-400" /> Timeline Analysis
                </h3>
                
                <div className="flex-1 flex flex-col items-center justify-center text-center">
                  {examDate ? (
                    <>
-                     <span className="text-7xl font-black text-white drop-shadow-lg mb-2">{daysRemaining > 0 ? daysRemaining : 0}</span>
-                     <span className="text-xl font-bold text-slate-400">Days Remaining</span>
+                     <span className="text-5xl sm:text-7xl font-black text-white drop-shadow-lg mb-1 sm:mb-2">{daysRemaining > 0 ? daysRemaining : 0}</span>
+                     <span className="text-base sm:text-xl font-bold text-slate-400">Days Remaining</span>
                      
                      {daysRemaining > 0 ? (
-                       <div className="mt-8 p-4 bg-brand-500/10 border border-brand-500/30 rounded-2xl">
-                          <p className="text-brand-300 font-medium text-sm">
-                            Perfect. The AI will distribute your topics across the first <strong className="text-white">{Math.floor(daysRemaining * 0.8)} days</strong>, and reserve the final <strong className="text-white">{Math.ceil(daysRemaining * 0.2)} days</strong> for intensive revision.
+                       <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-brand-500/10 border border-brand-500/30 rounded-2xl">
+                          <p className="text-brand-300 font-medium text-xs sm:text-sm">
+                            The AI will distribute your topics across the first <strong className="text-white">{Math.floor(daysRemaining * 0.8)} days</strong>, and reserve the final <strong className="text-white">{Math.ceil(daysRemaining * 0.2)} days</strong> for intensive revision.
                           </p>
                        </div>
                      ) : (
-                       <div className="mt-8 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl flex items-start gap-3">
+                       <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-red-500/10 border border-red-500/30 rounded-2xl flex items-start gap-3">
                           <AlertCircle className="text-red-400 shrink-0 mt-0.5" />
-                          <p className="text-red-300 font-medium text-sm text-left">
+                          <p className="text-red-300 font-medium text-xs sm:text-sm text-left">
                             The target date has passed or is today. Please select a future date to generate a timeline.
                           </p>
                        </div>
                      )}
                    </>
                  ) : (
-                   <div className="text-slate-500 font-medium">
-                     <CalendarIcon size={48} className="mx-auto mb-4 opacity-20" />
+                   <div className="text-slate-500 font-medium text-sm sm:text-base">
+                     <CalendarIcon size={40} className="mx-auto mb-3 opacity-20" />
                      Select an exam date to calculate your remaining runway.
                    </div>
                  )}
@@ -221,14 +221,14 @@ const SmartCalendar = ({ user }) => {
                <button 
                  onClick={handleGenerate}
                  disabled={daysRemaining <= 0 || !topicsText}
-                 className={`w-full mt-8 py-4 rounded-xl font-black text-lg transition-all flex items-center justify-center gap-2 shadow-lg
+                 className={`w-full mt-6 sm:mt-8 py-3.5 sm:py-4 rounded-xl font-black text-sm sm:text-lg transition-all flex items-center justify-center gap-2 shadow-lg
                    ${(daysRemaining > 0 && topicsText) 
                      ? 'bg-brand-500 hover:bg-brand-400 text-white hover:-translate-y-1' 
                      : 'bg-slate-800 text-slate-600 cursor-not-allowed'
                    }
                  `}
                >
-                 Generate Smart Calendar <ArrowRight size={20} />
+                 Generate Smart Calendar <ArrowRight size={18} />
                </button>
             </PremiumCard>
           </div>
@@ -238,21 +238,21 @@ const SmartCalendar = ({ user }) => {
       {step === 'generating' && <LoadingAI message="Synthesizing Temporal Strategy..." progress={generationProgress} />}
 
       {step === 'calendar' && (
-        <div className="space-y-8 animate-fade-in-up">
-           <div className="flex items-center justify-between mb-2">
+        <div className="space-y-6 sm:space-y-8 animate-fade-in-up">
+           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
              <div>
-               <h2 className="text-3xl font-black text-slate-900 tracking-tight">Your Action Plan</h2>
-               <p className="text-slate-500 font-medium mt-1">Roadmap for {examName} ({calendarPlan.length} Days)</p>
+               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Your Action Plan</h2>
+               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">Roadmap for {examName} ({calendarPlan.length} Days)</p>
              </div>
              <button 
                onClick={() => setStep('config')}
-               className="px-4 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-600 hover:text-slate-900 shadow-sm transition-all"
+               className="self-start sm:self-auto px-3.5 py-1.5 sm:px-4 sm:py-2 bg-white border border-slate-200 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 shadow-sm transition-all"
              >
                Edit Parameters
              </button>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {calendarPlan.map((day, idx) => {
                 const isRevision = day.phase && day.phase.toLowerCase().includes('revision');
                 
