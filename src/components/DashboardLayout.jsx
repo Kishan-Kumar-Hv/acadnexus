@@ -113,11 +113,12 @@ const DashboardLayout = ({ user, setUser }) => {
             </button>
             <div className="w-96 hidden lg:flex items-center bg-slate-100 dark:bg-slate-700 rounded-full px-4 py-2 border border-transparent focus-within:border-brand-500/30 focus-within:bg-white dark:focus-within:bg-slate-800 focus-within:shadow-sm transition-all focus-within:ring-4 focus-within:ring-brand-500/10">
               <Search size={18} className="text-slate-400 dark:text-slate-500" />
-            <input 
-              type="text" 
-              placeholder="Search tasks, materials, etc..." 
-              className="bg-transparent border-none focus:outline-none ml-3 w-full text-sm text-slate-700 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-500 font-medium"
-            />
+              <input 
+                type="text" 
+                placeholder="Search tasks, materials, etc..." 
+                className="bg-transparent border-none focus:outline-none ml-3 w-full text-sm text-slate-700 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-500 font-medium"
+              />
+            </div>
           </div>
 
           <div className="flex items-center gap-6 ml-auto">
