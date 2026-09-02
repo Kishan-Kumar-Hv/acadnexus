@@ -241,7 +241,8 @@ const DashboardHome = ({ user }) => {
     const userId = user?._id || user?.googleId || user?.email;
     if (userId) {
       try {
-        const res = await axios.post(`${API_BASE_URL}/api/tasks/${userId}`, newTask);
+        const { _id, ...taskPayload } = newTask;
+        const res = await axios.post(`${API_BASE_URL}/api/tasks/${userId}`, taskPayload);
         if (res.data && res.data._id) {
           setTasks(prev => prev.map(t => t._id === newTask._id ? res.data : t));
         }
