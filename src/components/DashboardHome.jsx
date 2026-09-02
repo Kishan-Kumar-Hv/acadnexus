@@ -205,35 +205,46 @@ const DashboardHome = ({ user }) => {
 
   const handleAddTask = async (e) => {
     e.preventDefault();
-    if (!newTaskTitle.trim() || !user?._id) return;
-    try {
-      let formattedTime = 'Today';
-      let parsedDate = null;
-      if (newTaskDueDate) {
-        parsedDate = new Date(newTaskDueDate);
-        formattedTime = parsedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
-      }
+    if (!newTaskTitle.trim()) return;
+    
+    let formattedTime = 'Today';
+    let parsedDate = null;
+    if (newTaskDueDate) {
+      parsedDate = new Date(newTaskDueDate);
+      formattedTime = parsedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
+    }
 
-      const newTask = {
-        title: newTaskTitle,
-        type: 'General',
-        time: formattedTime,
-        dueDate: parsedDate,
-        dueTime: formattedTime,
-        urgency: newTaskDueDate ? 'high' : 'medium',
-        bgTheme: 'from-brand-400 to-brand-500',
-        accent: 'text-brand-500',
-        progress: 0,
-        status: 'pending',
-        iconName: 'Target'
-      };
-      const res = await axios.post(`${API_BASE_URL}/api/tasks/${user._id}`, newTask);
-      setTasks([...tasks, res.data]);
-      setNewTaskTitle('');
-      setNewTaskDueDate('');
-      setIsAdding(false);
-    } catch (err) {
-      console.error('Failed to add task', err);
+    const newTask = {
+      _id: 'task-' + Date.now(),
+      title: newTaskTitle,
+      type: 'General',
+      time: formattedTime,
+      dueDate: parsedDate,
+      dueTime: formattedTime,
+      urgency: newTaskDueDate ? 'high' : 'medium',
+      bgTheme: 'from-brand-400 to-brand-500',
+      accent: 'text-brand-500',
+      progress: 0,
+      status: 'pending',
+      iconName: 'Target'
+    };
+
+    // Optimistic UI update so the task appears instantly
+    setTasks(prev => [...prev, newTask]);
+    setNewTaskTitle('');
+    setNewTaskDueDate('');
+    setIsAdding(false);
+
+    const userId = user?._id || user?.googleId || user?.email;
+    if (userId) {
+      try {
+        const res = await axios.post(`${API_BASE_URL}/api/tasks/${userId}`, newTask);
+        if (res.data && res.data._id) {
+          setTasks(prev => prev.map(t => t._id === newTask._id ? res.data : t));
+        }
+      } catch (err) {
+        console.error('Failed to sync task with backend', err);
+      }
     }
   };
 
