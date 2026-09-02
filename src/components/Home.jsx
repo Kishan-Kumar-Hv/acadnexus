@@ -28,7 +28,10 @@ const Home = ({ setRoute, setUser }) => {
         setUser(clientUser);
 
         try {
-          const res = await axios.post(`${API_BASE_URL}/api/auth/google`, clientUser, { timeout: 3000 });
+          const res = await axios.post(`${API_BASE_URL}/api/auth/google`, {
+            ...clientUser,
+            credential: credentialResponse.credential
+          }, { timeout: 10000 });
           if (res.data && res.data.user) {
             setUser(res.data.user);
           }

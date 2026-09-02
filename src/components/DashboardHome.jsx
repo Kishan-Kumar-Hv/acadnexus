@@ -185,10 +185,13 @@ const DashboardHome = ({ user }) => {
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
 
   const fetchTasks = async () => {
-    if (!user?._id) return;
+    const userId = user?._id || user?.googleId || user?.email;
+    if (!userId) return;
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/tasks/${user._id}`);
-      setTasks(res.data);
+      const res = await axios.get(`${API_BASE_URL}/api/tasks/${userId}`);
+      if (Array.isArray(res.data)) {
+        setTasks(res.data);
+      }
     } catch (err) {
       console.error('Failed to fetch tasks', err);
     }
@@ -197,7 +200,7 @@ const DashboardHome = ({ user }) => {
   useEffect(() => {
     setMounted(true);
     fetchTasks();
-  }, [user]);
+  }, [user?._id, user?.googleId, user?.email]);
 
   const pendingTasks = tasks.filter(t => t.status === 'pending');
   const completedTasks = tasks.filter(t => t.status === 'completed');
