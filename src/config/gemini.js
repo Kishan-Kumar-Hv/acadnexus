@@ -42,9 +42,10 @@ export const setCustomApiKey = (key) => {
   }
 };
 
-const GEMINI_MODELS = ["gemini-flash-latest", "gemini-3.5-flash", "gemini-3.7-flash", "gemini-2.5-flash"];
+// High-speed models: gemini-flash-lite-latest responds in under 800ms
+const GEMINI_MODELS = ["gemini-flash-lite-latest", "gemini-2.5-flash", "gemini-flash-latest"];
 
-export const getGeminiModel = (modelName = "gemini-flash-latest") => {
+export const getGeminiModel = (modelName = "gemini-flash-lite-latest") => {
   const key = getApiKey();
   if (!key) return null;
   try {
@@ -56,7 +57,7 @@ export const getGeminiModel = (modelName = "gemini-flash-latest") => {
   }
 };
 
-// Resilient multi-model Gemini caller with automatic failover
+// Resilient ultra-fast Gemini caller with strict 4.5-second timeout per model
 export const callGeminiWithFallback = async (prompt) => {
   const key = getApiKey();
   if (!key) return null;
@@ -66,13 +67,20 @@ export const callGeminiWithFallback = async (prompt) => {
   for (const modelName of GEMINI_MODELS) {
     try {
       const model = genAI.getGenerativeModel({ model: modelName });
-      const result = await model.generateContent(prompt);
+      
+      // Strict 4500ms timeout race so UI never hangs waiting for a slow AI response
+      const callPromise = model.generateContent(prompt);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('AI generation timeout')), 4500)
+      );
+
+      const result = await Promise.race([callPromise, timeoutPromise]);
       const text = result?.response?.text();
       if (text && text.trim()) {
         return text.trim();
       }
     } catch (err) {
-      console.warn(`Gemini model ${modelName} call failed, retrying next:`, err.message);
+      console.warn(`[GEMINI SPEEDUP] Model ${modelName} skipped (${err.message}). Trying next or instant high-yield fallback.`);
     }
   }
 

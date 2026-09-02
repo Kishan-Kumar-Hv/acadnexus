@@ -95,12 +95,13 @@ const AptitudeAssessment = ({ user }) => {
   const calculateResults = async (finalAnswers) => {
     setStep('processing');
     
-    let progress = 0;
+    let progress = 20;
+    setProcessingProgress(progress);
     const progressInterval = setInterval(() => {
-      progress += Math.floor(Math.random() * 10) + 2;
-      if (progress > 90) progress = 90;
+      progress += Math.floor(Math.random() * 20) + 15;
+      if (progress > 95) progress = 95;
       setProcessingProgress(progress);
-    }, 400);
+    }, 80);
 
     try {
       const counts = { analytical: 0, creative: 0, social: 0, practical: 0 };
