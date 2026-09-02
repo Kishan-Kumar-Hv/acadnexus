@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import dns from 'node:dns';
 
 // Configure SMTP Transporter (supports Gmail App Passwords, SendGrid, Mailgun, etc.)
 const createTransporter = () => {
@@ -13,11 +14,13 @@ const createTransporter = () => {
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
-    family: 4,
     auth: { user, pass },
-    connectionTimeout: 8000,
-    greetingTimeout: 8000,
-    socketTimeout: 10000
+    lookup: (hostname, options, callback) => {
+      dns.lookup(hostname, { family: 4 }, callback);
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000
   });
 };
 
