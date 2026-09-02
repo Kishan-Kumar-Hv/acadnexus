@@ -31,6 +31,32 @@ app.get('/', (req, res) => {
   res.send('AcadNexus API is running...');
 });
 
+import { sendTaskOverdueEmail } from './services/emailService.js';
+import { checkOverdueTasks } from './services/notificationWorker.js';
+
+// Direct test endpoint to verify email delivery from Render
+app.get('/api/test-email', async (req, res) => {
+  const email = req.query.email || process.env.EMAIL_USER;
+  try {
+    const fakeUser = { name: 'Kishan Kumar', email };
+    const fakeTask = { title: 'Immediate Test Task', dueTime: 'Just Now', dueDate: new Date() };
+    const result = await sendTaskOverdueEmail(fakeUser, fakeTask);
+    res.json({ status: 'ok', sentTo: email, result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Direct trigger to run overdue tasks checker immediately
+app.get('/api/check-overdue', async (req, res) => {
+  try {
+    await checkOverdueTasks();
+    res.json({ status: 'checkOverdueTasks completed' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 import authRoutes from './routes/auth.js';
 import tasksRoutes from './routes/tasks.js';
 import communityRoutes from './routes/community.js';
