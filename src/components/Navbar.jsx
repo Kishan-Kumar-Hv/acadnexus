@@ -23,32 +23,23 @@ const Navbar = ({ currentRoute, setRoute, user, setUser }) => {
   ];
 
   const handleGoogleSuccess = async (credentialResponse) => {
+    console.log('GoogleLogin onSuccess called', credentialResponse);
     setIsLoading(true);
     try {
       if (credentialResponse?.credential) {
-        const decoded = jwtDecode(credentialResponse.credential);
-        const clientUser = {
-          _id: decoded.sub || ('usr-' + Date.now()),
-          googleId: decoded.sub || ('google-usr-' + Date.now()),
-          email: decoded.email || 'student@acadnexus.com',
-          name: decoded.name || 'Student User',
-          given_name: decoded.given_name || decoded.name?.split(' ')[0] || 'Student',
-          picture: decoded.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(decoded.name || 'Student')}&background=0D8ABC&color=fff`,
-          academicStage: 'Completed 12th Grade',
-          targetMajor: 'Computer Science & AI'
-        };
-
-        // Instant UI transition
-        setUser(clientUser);
-
-        // Async sync with backend database
-        try {
-          const res = await axios.post(`${API_BASE_URL}/api/auth/google`, clientUser, { timeout: 3000 });
-          if (res.data && res.data.user) {
-            setUser(res.data.user);
+        // Send JWT credential to backend for verification / user creation
+        const res = await axios.post(
+          `${API_BASE_URL}/api/auth/google`,
+          { credential: credentialResponse.credential },
+          { timeout: 5000 }
+        );
+        console.log('Backend response', res.data);
+        if (res.data && res.data.user) {
+          setUser(res.data.user);
+          // Store JWT token for future API calls
+          if (res.data.token) {
+            localStorage.setItem('token', res.data.token);
           }
-        } catch (dbSyncErr) {
-          console.warn('Backend database sync warning (user logged in locally):', dbSyncErr);
         }
       }
     } catch (error) {
@@ -60,34 +51,31 @@ const Navbar = ({ currentRoute, setRoute, user, setUser }) => {
 
   const loginWithPopup = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
+      console.log('Popup login success', tokenResponse);
       setIsLoading(true);
       try {
+        // Retrieve user info using access token
         const userInfo = await axios.get(
           'https://www.googleapis.com/oauth2/v3/userinfo',
           { headers: { Authorization: `Bearer ${tokenResponse.access_token}` } }
         );
-
-        const clientUser = {
-          _id: userInfo.data.sub || ('usr-' + Date.now()),
-          googleId: userInfo.data.sub || ('google-usr-' + Date.now()),
-          email: userInfo.data.email,
-          name: userInfo.data.name,
-          given_name: userInfo.data.given_name || userInfo.data.name?.split(' ')[0] || 'Student',
-          picture: userInfo.data.picture,
-          academicStage: 'Completed 12th Grade',
-          targetMajor: 'Computer Science & AI'
-        };
-
-        // Instant UI transition
-        setUser(clientUser);
-
-        try {
-          const res = await axios.post(`${API_BASE_URL}/api/auth/google`, clientUser, { timeout: 3000 });
-          if (res.data && res.data.user) {
-            setUser(res.data.user);
+        // Prepare payload for backend – prefer ID token if present
+        const payload = tokenResponse.id_token
+          ? { credential: tokenResponse.id_token }
+          : { email: userInfo.data.email, name: userInfo.data.name };
+        const res = await axios.post(
+          `${API_BASE_URL}/api/auth/google`,
+          payload,
+          { timeout: 5000 }
+        );
+        console.log('Backend response (popup)', res.data);
+        if (res.data && res.data.user) {
+          setUser(res.data.user);
+          // Store JWT token
+          if (res.data.token) {
+            localStorage.setItem('token', res.data.token);
           }
-        } catch (dbSyncErr) {
-          console.warn('Backend database sync warning (user logged in locally):', dbSyncErr);
+          setRoute('dashboard');
         }
       } catch (err) {
         console.error('Google Popup Auth Error:', err);
@@ -97,6 +85,18 @@ const Navbar = ({ currentRoute, setRoute, user, setUser }) => {
     },
     onError: (err) => console.error('Google Popup Error:', err)
   });
+
+  // Debug helper to test backend connectivity
+  const testBackend = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/auth/default-user`);
+      console.log('Backend default-user test response:', res.data);
+      alert('Backend reachable! See console for details.');
+    } catch (e) {
+      console.error('Backend test failed:', e);
+      alert('Backend unreachable – check console for error.');
+    }
+  };
 
   const handleLogout = () => {
     setUser(null);
@@ -184,6 +184,14 @@ const Navbar = ({ currentRoute, setRoute, user, setUser }) => {
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                     </svg>
                     <span>Popup Login</span>
+                  </button>
+                  {/* Debug button */}
+                  <button
+                    onClick={testBackend}
+                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded"
+                    title="Test backend connectivity"
+                  >
+                    Test Backend
                   </button>
                 </div>
               )}

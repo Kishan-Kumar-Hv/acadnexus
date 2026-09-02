@@ -3,12 +3,12 @@ import { Brain, BookOpen, Target, Puzzle, CheckCircle2, ChevronRight, Calculator
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 import { generatePrepGuideData, generatePrepQuizData } from '../config/gemini';
+import GlassCard from './ui/GlassCard';
 
 const PremiumCard = ({ children, className = "" }) => (
-  <div className={`relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl border border-white/80 dark:border-slate-700 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md ${className}`}>
-    <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none"></div>
-    <div className="relative z-10">{children}</div>
-  </div>
+  <GlassCard className={`relative rounded-2xl border border-white/80 dark:border-slate-700 shadow-sm overflow-hidden transition-all duration-300 ${className}`}>
+    {children}
+  </GlassCard>
 );
 
 const formatTime = (seconds) => {
@@ -218,7 +218,7 @@ const AptitudePreparation = ({ user }) => {
                      </div>
                      <div>
                        <h2 className="text-2xl font-black text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">{category.title}</h2>
-                       <p className="text-slate-500 font-medium leading-relaxed">{category.description}</p>
+                       <p className="text-slate-500 font-medium leading-relaxed dark:text-slate-300">{category.description}</p>
                      </div>
                    </div>
 
@@ -235,18 +235,18 @@ const AptitudePreparation = ({ user }) => {
                    </div>
 
                    <div className="grid grid-cols-2 gap-4 mt-auto">
-                     <button 
-                       onClick={() => handleLearn(category)}
-                       className="py-4 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-bold rounded-xl transition-all flex items-center justify-center gap-2"
-                     >
-                       <BookOpen size={18} /> Learn Theory
-                     </button>
-                     <button 
-                       onClick={() => handleQuiz(category)}
-                       className="py-4 bg-slate-900 hover:bg-blue-600 text-white font-bold rounded-xl transition-all shadow-lg hover:-translate-y-1 hover:shadow-xl flex items-center justify-center gap-2"
-                     >
-                       <Target size={18} /> Practice AI Quiz
-                     </button>
+                     <button
+                        onClick={() => handleLearn(category)}
+                        className="btn-primary"
+                      >
+                        <BookOpen size={18} /> Learn Theory
+                      </button>
+                      <button
+                        onClick={() => handleQuiz(category)}
+                        className="btn-secondary"
+                      >
+                        <Target size={18} /> Practice AI Quiz
+                      </button>
                    </div>
                 </PremiumCard>
               );
@@ -299,12 +299,12 @@ const AptitudePreparation = ({ user }) => {
              </div>
 
              <div className="mt-10 flex justify-center">
-               <button 
-                 onClick={() => handleQuiz(activeCategory)}
-                 className="px-8 py-4 bg-slate-900 hover:bg-blue-600 text-white font-bold rounded-2xl transition-all shadow-lg hover:-translate-y-1 flex items-center gap-3 text-lg"
-               >
-                 Ready? Take the Timed Quiz <Play size={20} />
-               </button>
+               <button
+                  onClick={() => handleQuiz(activeCategory)}
+                  className="btn-secondary px-8 py-4 text-lg"
+                >
+                  Ready? Take the Timed Quiz <Play size={20} />
+                </button>
              </div>
           </PremiumCard>
         </div>
@@ -361,19 +361,19 @@ const AptitudePreparation = ({ user }) => {
                 </div>
 
                 <div className="flex justify-between items-center">
-                   <button 
-                     onClick={() => setStep('home')}
-                     className="text-slate-500 hover:text-red-500 font-bold transition-colors"
-                   >
-                     Forfeit Quiz
-                   </button>
-                   <button 
-                    onClick={submitAnswer} 
-                    disabled={selectedAnswer === null}
-                    className={`px-8 py-4 font-bold rounded-2xl flex items-center gap-2 transition-all ${selectedAnswer !== null ? 'bg-slate-900 hover:bg-blue-600 text-white shadow-lg hover:-translate-y-1' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
-                   >
-                     {currentQuestionIndex < quizQuestions.length - 1 ? 'Next Question' : 'Finish Quiz'} <ChevronRight size={20} />
-                   </button>
+                   <button
+                      onClick={() => setStep('home')}
+                      className="btn-tertiary"
+                    >
+                      Forfeit Quiz
+                    </button>
+                    <button
+                     onClick={submitAnswer} 
+                     disabled={selectedAnswer === null}
+                     className={`btn-primary ${selectedAnswer !== null ? '' : 'opacity-50 cursor-not-allowed'}`}
+                    >
+                      {currentQuestionIndex < quizQuestions.length - 1 ? 'Next Question' : 'Finish Quiz'} <ChevronRight size={20} />
+                    </button>
                 </div>
              </div>
            </PremiumCard>
