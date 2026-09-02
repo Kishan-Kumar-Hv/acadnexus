@@ -31,7 +31,13 @@ router.post('/:userId', async (req, res) => {
     const user = await findUser(req.params.userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    user.tasks.push(req.body);
+    const taskData = { ...req.body };
+    // Remove custom string _id so Mongoose generates its own valid ObjectId
+    if (typeof taskData._id === 'string' && !taskData._id.match(/^[0-9a-fA-F]{24}$/)) {
+      delete taskData._id;
+    }
+
+    user.tasks.push(taskData);
     await user.save();
     
     // Return the newly added task (last one)
