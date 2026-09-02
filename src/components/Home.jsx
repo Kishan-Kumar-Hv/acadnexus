@@ -93,6 +93,7 @@ const Home = ({ setRoute, setUser }) => {
               theme="filled_black"
               shape="pill"
               size="large"
+              useOneTap={false}
             />
           </div>
           <button 
