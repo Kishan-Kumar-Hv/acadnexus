@@ -10,11 +10,11 @@ const createTransporter = () => {
   }
 
   return nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user, pass },
-    connectionTimeout: 15000,
-    greetingTimeout: 15000,
-    socketTimeout: 20000
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // TLS
+    family: 4,     // Force IPv4 (fixes Render ENETUNREACH IPv6 issue)
+    auth: { user, pass }
   });
 };
 
