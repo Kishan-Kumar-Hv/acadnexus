@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import dns from 'node:dns';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
 
 // Configure SMTP Transporter fallback
 const createTransporter = () => {
@@ -30,17 +31,46 @@ const createTransporter = () => {
 };
 
 /**
- * Dispatch an email using Resend HTTPS API (fast, reliable on cloud hosts) with SMTP fallback
+ * Dispatch an email using Brevo/Resend HTTPS API with SMTP fallback
  */
 const sendMail = async ({ to, subject, html }) => {
-  // Clean up recipient email
   const recipient = (to || '').trim();
   if (!recipient) {
     console.error('[EMAIL ERROR] No recipient email specified');
     return { success: false, error: 'No recipient email' };
   }
 
-  // 1. Try Resend HTTP API first (port 443 HTTPS - never blocked by cloud hosts like Render)
+  // 1. Try Brevo REST API (Sends to ANY recipient, no domain verification required)
+  if (BREVO_API_KEY) {
+    try {
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': BREVO_API_KEY,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          sender: { name: 'AcadNexus AI', email: process.env.EMAIL_USER || 'kishankumarhv5@gmail.com' },
+          to: [{ email: recipient }],
+          subject,
+          htmlContent: html
+        })
+      });
+
+      const data = await response.json();
+      if (response.ok && data.messageId) {
+        console.log(`[BREVO EMAIL SENT] To: ${recipient} MessageId: ${data.messageId}`);
+        return { success: true, messageId: data.messageId, provider: 'brevo' };
+      } else {
+        console.warn('[BREVO WARN] Error:', data);
+      }
+    } catch (brevoErr) {
+      console.warn('[BREVO ERROR] Failed, trying next provider:', brevoErr.message);
+    }
+  }
+
+  // 2. Try Resend HTTP API
   if (RESEND_API_KEY) {
     try {
       const fromAddress = process.env.EMAIL_FROM || 'AcadNexus AI <onboarding@resend.dev>';
@@ -59,19 +89,18 @@ const sendMail = async ({ to, subject, html }) => {
       });
 
       const data = await response.json();
-
       if (response.ok && data.id) {
         console.log(`[RESEND EMAIL SENT] To: ${recipient} ID: ${data.id}`);
         return { success: true, messageId: data.id, provider: 'resend' };
       } else {
-        console.warn('[RESEND WARN] API responded with error:', data);
+        console.warn('[RESEND WARN] Error:', data);
       }
     } catch (resendErr) {
-      console.warn('[RESEND ERROR] Failed HTTP dispatch, trying SMTP:', resendErr.message);
+      console.warn('[RESEND ERROR] Failed:', resendErr.message);
     }
   }
 
-  // 2. Fallback to Nodemailer SMTP
+  // 3. Fallback to Nodemailer SMTP
   const transporter = createTransporter();
   if (!transporter) {
     console.log(`\n======================================================`);
