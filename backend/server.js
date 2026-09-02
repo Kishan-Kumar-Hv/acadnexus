@@ -5,6 +5,10 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import dns from 'node:dns';
+
+// Fix Render Linux IPv6 ENETUNREACH bug by forcing Node to use IPv4 first
+dns.setDefaultResultOrder('ipv4first');
 
 dotenv.config();
 

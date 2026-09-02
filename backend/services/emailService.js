@@ -1,7 +1,9 @@
 import nodemailer from 'nodemailer';
 import dns from 'node:dns';
 
-// Configure SMTP Transporter (supports Gmail App Passwords, SendGrid, Mailgun, etc.)
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+
+// Configure SMTP Transporter fallback
 const createTransporter = () => {
   const user = process.env.EMAIL_USER || process.env.SMTP_USER;
   const pass = process.env.EMAIL_PASS || process.env.SMTP_PASS;
@@ -16,7 +18,10 @@ const createTransporter = () => {
     secure: true,
     auth: { user, pass },
     lookup: (hostname, options, callback) => {
-      dns.lookup(hostname, { family: 4 }, callback);
+      const cb = typeof options === 'function' ? options : callback;
+      dns.lookup(hostname, { family: 4 }, (err, address, family) => {
+        cb(err, address, family);
+      });
     },
     connectionTimeout: 10000,
     greetingTimeout: 10000,
@@ -25,17 +30,54 @@ const createTransporter = () => {
 };
 
 /**
- * Dispatch an email with fallback console logging
+ * Dispatch an email using Resend HTTPS API (fast, reliable on cloud hosts) with SMTP fallback
  */
 const sendMail = async ({ to, subject, html }) => {
-  const transporter = createTransporter();
+  // Clean up recipient email
+  const recipient = (to || '').trim();
+  if (!recipient) {
+    console.error('[EMAIL ERROR] No recipient email specified');
+    return { success: false, error: 'No recipient email' };
+  }
 
+  // 1. Try Resend HTTP API first (port 443 HTTPS - never blocked by cloud hosts like Render)
+  if (RESEND_API_KEY) {
+    try {
+      const fromAddress = process.env.EMAIL_FROM || 'AcadNexus AI <onboarding@resend.dev>';
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: fromAddress,
+          to: recipient,
+          subject,
+          html
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.id) {
+        console.log(`[RESEND EMAIL SENT] To: ${recipient} ID: ${data.id}`);
+        return { success: true, messageId: data.id, provider: 'resend' };
+      } else {
+        console.warn('[RESEND WARN] API responded with error:', data);
+      }
+    } catch (resendErr) {
+      console.warn('[RESEND ERROR] Failed HTTP dispatch, trying SMTP:', resendErr.message);
+    }
+  }
+
+  // 2. Fallback to Nodemailer SMTP
+  const transporter = createTransporter();
   if (!transporter) {
     console.log(`\n======================================================`);
-    console.log(`[EMAIL NOTIFICATION SIMULATED - EMAIL_USER/PASS NOT SET]`);
-    console.log(`To: ${to}`);
+    console.log(`[EMAIL NOTIFICATION SIMULATED - NO PROVIDER CONFIGURED]`);
+    console.log(`To: ${recipient}`);
     console.log(`Subject: ${subject}`);
-    console.log(`Content Preview: ${html.substring(0, 140)}...`);
     console.log(`======================================================\n`);
     return { success: true, simulated: true };
   }
@@ -43,14 +85,14 @@ const sendMail = async ({ to, subject, html }) => {
   try {
     const info = await transporter.sendMail({
       from: `"AcadNexus AI" <${process.env.EMAIL_USER || 'notifications@acadnexus.com'}>`,
-      to,
+      to: recipient,
       subject,
       html
     });
-    console.log(`[EMAIL SENT SUCCESSFULLY] To: ${to} MessageId: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
+    console.log(`[SMTP EMAIL SENT] To: ${recipient} MessageId: ${info.messageId}`);
+    return { success: true, messageId: info.messageId, provider: 'smtp' };
   } catch (error) {
-    console.error(`[EMAIL SEND FAILED] To: ${to} Error:`, error.message);
+    console.error(`[SMTP EMAIL FAILED] To: ${recipient} Error:`, error.message);
     return { success: false, error: error.message };
   }
 };
@@ -181,11 +223,11 @@ export const sendScoreReportEmail = async (user, assessmentData) => {
         <div style="background-color: #1e293b; border-radius: 12px; padding: 18px; margin-bottom: 24px;">
           <h4 style="margin: 0 0 8px 0; font-size: 14px; color: #34d399; text-transform: uppercase; letter-spacing: 0.5px;">Cognitive Feedback</h4>
           <p style="margin: 0; font-size: 14px; color: #cbd5e1; line-height: 1.6;">
-            ${percentage >= 80 
-              ? 'Outstanding grasp of underlying concepts! Your problem-solving velocity is within the top percentile.' 
-              : percentage >= 50 
-              ? 'Good working understanding. Focus on active flashcard recall on missed topics to cement exam readiness.' 
-              : 'Foundational review recommended. Generate a tailored study plan in AcadNexus to target weak areas.'}
+            ${percentage >= 80
+      ? 'Outstanding grasp of underlying concepts! Your problem-solving velocity is within the top percentile.'
+      : percentage >= 50
+        ? 'Good working understanding. Focus on active flashcard recall on missed topics to cement exam readiness.'
+        : 'Foundational review recommended. Generate a tailored study plan in AcadNexus to target weak areas.'}
           </p>
         </div>
 
