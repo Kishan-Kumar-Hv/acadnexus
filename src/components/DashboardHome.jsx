@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, Clock, Flame, TrendingUp, Calendar as CalendarIcon, MoreVertical, PlayCircle, Zap, BookOpen, Activity, Sparkles, Check, ChevronRight, Target, Trophy, Plus, Trash2 } from 'lucide-react';
+import { CheckCircle, Clock, Flame, TrendingUp, Calendar as CalendarIcon, MoreVertical, PlayCircle, Zap, BookOpen, Activity, Sparkles, Check, ChevronRight, Target, Trophy, Plus, Trash2, Bell, AlertTriangle, Mail } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 
@@ -182,6 +182,7 @@ const DashboardHome = ({ user }) => {
   const [tasks, setTasks] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskDueDate, setNewTaskDueDate] = useState('');
 
   const fetchTasks = async () => {
     if (!user?._id) return;
@@ -206,11 +207,20 @@ const DashboardHome = ({ user }) => {
     e.preventDefault();
     if (!newTaskTitle.trim() || !user?._id) return;
     try {
+      let formattedTime = 'Today';
+      let parsedDate = null;
+      if (newTaskDueDate) {
+        parsedDate = new Date(newTaskDueDate);
+        formattedTime = parsedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
+      }
+
       const newTask = {
         title: newTaskTitle,
         type: 'General',
-        time: 'Today',
-        urgency: 'medium',
+        time: formattedTime,
+        dueDate: parsedDate,
+        dueTime: formattedTime,
+        urgency: newTaskDueDate ? 'high' : 'medium',
         bgTheme: 'from-brand-400 to-brand-500',
         accent: 'text-brand-500',
         progress: 0,
@@ -220,6 +230,7 @@ const DashboardHome = ({ user }) => {
       const res = await axios.post(`${API_BASE_URL}/api/tasks/${user._id}`, newTask);
       setTasks([...tasks, res.data]);
       setNewTaskTitle('');
+      setNewTaskDueDate('');
       setIsAdding(false);
     } catch (err) {
       console.error('Failed to add task', err);
@@ -447,18 +458,35 @@ const DashboardHome = ({ user }) => {
           
           <div className="mt-4 sm:mt-auto pt-3 sm:pt-8">
             {isAdding ? (
-              <form onSubmit={handleAddTask} className="flex flex-col gap-2 animate-fade-in-up">
-                <input 
-                  type="text" 
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  placeholder="Task title..." 
-                  className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
-                  autoFocus
-                />
-                <div className="flex gap-2">
-                  <button type="submit" className="flex-1 py-2 bg-brand-600 text-white font-bold rounded-xl text-xs sm:text-sm hover:bg-brand-700">Save</button>
-                  <button type="button" onClick={() => setIsAdding(false)} className="flex-1 py-2 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-xs sm:text-sm hover:bg-slate-300 dark:hover:bg-slate-600">Cancel</button>
+              <form onSubmit={handleAddTask} className="flex flex-col gap-2.5 animate-fade-in-up bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Task Title</label>
+                  <input 
+                    type="text" 
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                    placeholder="e.g. Finish Calculus Chapter 4..." 
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-xs sm:text-sm"
+                    autoFocus
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1 flex items-center justify-between">
+                    <span>Deadline & Email Alert</span>
+                    <span className="text-brand-600 dark:text-brand-400 text-[10px]">Auto-notified</span>
+                  </label>
+                  <input 
+                    type="datetime-local" 
+                    value={newTaskDueDate}
+                    onChange={(e) => setNewTaskDueDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 text-xs"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-1">
+                  <button type="submit" className="flex-1 py-2 bg-brand-600 text-white font-bold rounded-xl text-xs sm:text-sm hover:bg-brand-700">Save Mission</button>
+                  <button type="button" onClick={() => setIsAdding(false)} className="flex-1 py-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-xs sm:text-sm hover:bg-slate-200">Cancel</button>
                 </div>
               </form>
             ) : (
@@ -524,14 +552,21 @@ const DashboardHome = ({ user }) => {
                       )}
                     </div>
                     
-                    <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400">
                       <span className={`flex items-center gap-1.5 ${task.accent}`}>
                          <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${task.bgTheme}`}></div> {task.type}
                       </span>
                       <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                       <span className="flex items-center gap-1.5">
-                        <Clock size={16} className="text-slate-400 dark:text-slate-500" /> {task.time}
+                        <Clock size={15} className="text-slate-400 dark:text-slate-500" /> {task.dueTime || task.time}
                       </span>
+
+                      {/* Overdue alert indicator */}
+                      {task.dueDate && new Date(task.dueDate) < new Date() && task.status === 'pending' && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+                          <Mail size={12} className="text-red-600" /> Overdue (Email Notified)
+                        </span>
+                      )}
                     </div>
 
                     {/* Quick Progress Bar for pending */}

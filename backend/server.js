@@ -43,16 +43,20 @@ app.use('/api/community', communityRoutes);
 app.use('/api/plans', plansRoutes);
 app.use('/api/assessments', assessmentsRoutes);
 
+import { startNotificationWorker } from './services/notificationWorker.js';
+
 // Database Connection
 const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 mongoose
   .connect(mongoUri)
   .then(() => {
     console.log('Connected to MongoDB Successfully!');
+    startNotificationWorker();
   })
   .catch((error) => {
     console.error('MongoDB connection error:', error.message);
     console.warn('Running server in resilient mode for API & Auth services.');
+    startNotificationWorker();
   });
 
 app.listen(PORT, () => {

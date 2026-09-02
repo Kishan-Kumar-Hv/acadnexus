@@ -74,8 +74,12 @@ const userSchema = new mongoose.Schema({
     progress: Number,
     status: { type: String, default: 'pending' },
     iconName: String,
+    dueDate: Date,
+    dueTime: String,
+    overdueEmailSent: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }
-  }]
+  }],
+  lastWeeklyReportSent: Date
 }, { timestamps: true });
 
 export default mongoose.model('User', userSchema);

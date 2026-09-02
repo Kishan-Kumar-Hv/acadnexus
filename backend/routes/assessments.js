@@ -1,5 +1,6 @@
 import express from 'express';
 import User from '../models/User.js';
+import { sendScoreReportEmail } from '../services/emailService.js';
 
 const router = express.Router();
 
@@ -20,7 +21,13 @@ router.post('/score/:userId', async (req, res) => {
 
     user.quizScores.unshift(newScore);
     await user.save();
-    res.json({ message: 'Score saved successfully', quizScores: user.quizScores });
+
+    // Automatically send verified score report email
+    sendScoreReportEmail(user, newScore).catch(err => 
+      console.error('[EMAIL ERROR] sendScoreReportEmail:', err.message)
+    );
+
+    res.json({ message: 'Score saved successfully and report emailed', quizScores: user.quizScores });
   } catch (error) {
     console.error('Error saving score:', error);
     res.status(500).json({ error: 'Failed to save quiz score' });
