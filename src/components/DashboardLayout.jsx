@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, User, BookOpen, Calendar as CalendarIcon, Settings, LogOut, Search, Bell, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, User, BookOpen, Calendar as CalendarIcon, Settings, LogOut, Search, Bell, ChevronRight, Menu } from 'lucide-react';
 import DashboardHome from './DashboardHome';
 import Profile from './Profile';
 import StudyPlanner from './StudyPlanner';
@@ -16,6 +16,7 @@ import { Zap, GraduationCap, MessageSquare, Layers, Globe, Users, Brain } from '
 const DashboardLayout = ({ user, setUser }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigation = [
     { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
@@ -37,8 +38,16 @@ const DashboardLayout = ({ user, setUser }) => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex transition-colors duration-300">
+      {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-20 md:hidden transition-opacity"
+          onClick={() => setIsMobileMenuOpen(false)}
+        ></div>
+      )}
+
       {/* Sidebar (Left Corner) */}
-      <aside className="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 hidden md:flex flex-col fixed h-full z-20 shadow-soft transition-colors duration-300">
+      <aside className={`w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col fixed h-full z-30 shadow-soft transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="h-20 flex items-center px-6 border-b border-slate-100 dark:border-slate-700">
           <div className="flex items-center gap-3">
              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-600 to-brand-400 flex items-center justify-center shadow-lg shadow-brand-500/30">
@@ -59,7 +68,7 @@ const DashboardLayout = ({ user, setUser }) => {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
                   className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden
                     ${isActive 
                       ? 'bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-[0_8px_16px_rgb(0,0,0,0.15)] shadow-brand-500/30 font-bold transform scale-105' 
@@ -92,11 +101,18 @@ const DashboardLayout = ({ user, setUser }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-64 flex flex-col min-h-screen">
+      <main className="flex-1 md:ml-64 flex flex-col min-h-screen w-full">
         {/* Top Header (Profile top right) */}
-        <header className="h-20 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10 flex items-center justify-between px-8 transition-colors duration-300">
-          <div className="w-96 hidden lg:flex items-center bg-slate-100 dark:bg-slate-700 rounded-full px-4 py-2 border border-transparent focus-within:border-brand-500/30 focus-within:bg-white dark:focus-within:bg-slate-800 focus-within:shadow-sm transition-all focus-within:ring-4 focus-within:ring-brand-500/10">
-            <Search size={18} className="text-slate-400 dark:text-slate-500" />
+        <header className="h-20 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10 flex items-center justify-between px-4 md:px-8 transition-colors duration-300">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-2 -ml-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            >
+              <Menu size={24} />
+            </button>
+            <div className="w-96 hidden lg:flex items-center bg-slate-100 dark:bg-slate-700 rounded-full px-4 py-2 border border-transparent focus-within:border-brand-500/30 focus-within:bg-white dark:focus-within:bg-slate-800 focus-within:shadow-sm transition-all focus-within:ring-4 focus-within:ring-brand-500/10">
+              <Search size={18} className="text-slate-400 dark:text-slate-500" />
             <input 
               type="text" 
               placeholder="Search tasks, materials, etc..." 
